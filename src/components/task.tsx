@@ -1,6 +1,6 @@
 export default function Task() {
   return (
-    <div>
+    <div className="bg-red-500">
       <p>This is a task</p>
     </div>
   );
