@@ -8,7 +8,7 @@ export interface DueDate {
 
 export interface Duration {
   amount: number;
-  unit: "minute" | "day";
+  unit: 'minute' | 'day';
 }
 
 export interface Task {
@@ -17,7 +17,6 @@ export interface Task {
   assignee_id: string | null;
   assigner_id: string | null;
   id: string;
-  content: string;
   description?: string;
   comment_count: number;
   is_completed: boolean;

@@ -1,13 +1,16 @@
-import "./App.css";
-import Project from "./components/project";
-import Task from "./components/task";
+import { App as AntdApp } from 'antd';
+import { Helmet } from 'react-helmet-async';
+
+import Logo from '#/assets/images/logo.png';
 
 function App() {
   return (
-    <div>
-      <Task />
-      <Project />
-    </div>
+    <AntdApp>
+      <Helmet>
+        <title>React Todoist</title>
+        <link rel="icon" href={Logo} />
+      </Helmet>
+    </AntdApp>
   );
 }
 

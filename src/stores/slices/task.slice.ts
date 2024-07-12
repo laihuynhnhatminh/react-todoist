@@ -1,5 +1,6 @@
-import type { StateCreator } from "zustand";
-import { Task } from "../../types";
+import { Task } from '@/types';
+
+import type { StateCreator } from 'zustand';
 
 export interface TaskSlice {
   tasks: Task[];

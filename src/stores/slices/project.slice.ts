@@ -1,5 +1,6 @@
-import type { StateCreator } from "zustand";
-import { Project } from "../../types";
+import { Project } from '@/types';
+
+import type { StateCreator } from 'zustand';
 
 export interface ProjectSlice {
   projects: Project[];
