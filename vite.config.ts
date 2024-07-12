@@ -15,7 +15,7 @@ export default defineConfig({
     react(),
     tsconfigPaths(),
     createSvgIconsPlugin({
-      iconDirs: [path.resolve(process.cwd(), 'public/assets/icons')],
+      iconDirs: [path.resolve(process.cwd(), 'src/assets/icons')],
       symbolId: 'icon-[dir]-[name]',
     }),
   ],
