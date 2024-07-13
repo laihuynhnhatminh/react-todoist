@@ -1,6 +1,6 @@
 import { createHashRouter, Navigate, RouteObject, RouterProvider } from 'react-router-dom';
 
-import Page403 from '@/pages/sys/error/Page403';
+import DashBoardLayout from '@/pages/dashboard/index';
 import { AppRouteObject } from '@/types/router';
 
 import { ErrorRoutes } from './routes/errorRoutes';
@@ -10,7 +10,7 @@ const { VITE_APP_HOMEPAGE: HOMEPAGE } = import.meta.env;
 export default function Router() {
   const asyncRoutes: AppRouteObject = {
     path: '/',
-    element: <Page403 />,
+    element: <DashBoardLayout />,
     children: [{ index: true, element: <Navigate to={HOMEPAGE} replace /> }],
   };
 

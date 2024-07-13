@@ -2,7 +2,7 @@ import { ThemeConfig } from 'antd';
 
 import { ThemeColorPresets } from '@/enums';
 /**
- * Antd theme editor: https://ant.design/theme-editor-cn
+ * Antd theme editor
  */
 const customThemeTokenConfig: ThemeConfig['token'] = {
   colorSuccess: '#22c55e',
@@ -10,7 +10,6 @@ const customThemeTokenConfig: ThemeConfig['token'] = {
   colorError: '#ff5630',
   colorInfo: '#00b8d9',
 
-  // 线性化
   wireframe: false,
 
   borderRadiusSM: 2,

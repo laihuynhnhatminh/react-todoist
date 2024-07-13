@@ -1,6 +1,6 @@
 import { StyleProvider } from '@ant-design/cssinjs';
 import { ConfigProvider, theme } from 'antd';
-import React from 'react';
+import 'antd/dist/reset.css';
 
 import { ThemeMode } from '@/enums';
 import useLocale from '@/locales/useLocale';
