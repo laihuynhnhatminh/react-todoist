@@ -13,7 +13,7 @@ export default function Logo({ size = 50 }: Props) {
 
   return (
     <NavLink to="/">
-      <Iconify icon="mdi-light:home" color={colorPrimary} size={size} />
+      <Iconify icon="solar:code-square-bold" color={colorPrimary} size={size} />
     </NavLink>
   );
 }

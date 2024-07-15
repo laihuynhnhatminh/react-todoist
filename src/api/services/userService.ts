@@ -1,26 +1,8 @@
-import { UserInfo, UserToken } from '@/types';
+import { UserInfo } from '@/types';
 
 import apiClient from '../apiClient';
-
-export interface SignInRequest {
-  username: string;
-  password: string;
-}
-
-export interface SignUpRequest extends SignInRequest {
-  email: string;
-}
-export interface SignInResponse extends UserToken {
-  user: UserInfo;
-}
-
-export enum UserApi {
-  SignIn = '/auth/signin',
-  SignUp = '/auth/signup',
-  SignOut = '/auth/signout',
-  Refresh = '/auth/refresh',
-  User = '/user',
-}
+import { SignInRequest, SignInResponse, SignUpRequest } from '../models/user';
+import { UserApi } from '../enums/user';
 
 const signIn = (data: SignInRequest) =>
   apiClient.post<SignInResponse>({ url: UserApi.SignIn, data });

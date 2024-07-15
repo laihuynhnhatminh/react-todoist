@@ -4,10 +4,13 @@ import { AxiosError } from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { create } from 'zustand';
 
-import userService, { SignInRequest } from '@/api/services/userService';
+import { SignInRequest } from '@/api/models/user';
+import userService from '@/api/services/userService';
 import { StorageEnum } from '@/enums';
 import { UserInfo, UserToken } from '@/types';
 import { getItem, removeItem, setItem } from '@/utils/storage';
+
+import { DEFAULT_USER } from '../_mocks/userMock';
 
 const { VITE_APP_HOMEPAGE: HOMEPAGE } = import.meta.env;
 
@@ -22,7 +25,7 @@ interface UserStore {
 }
 
 const useUserStore = create<UserStore>((set) => ({
-  userInfo: getItem<UserInfo>(StorageEnum.User) || {},
+  userInfo: getItem<UserInfo>(StorageEnum.User) || DEFAULT_USER,
   userToken: getItem<UserToken>(StorageEnum.Token) || {},
   actions: {
     setUserInfo: (userInfo) => {
