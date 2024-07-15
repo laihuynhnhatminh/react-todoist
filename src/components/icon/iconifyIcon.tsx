@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import type { IconProps } from '@iconify/react';
 
 interface Props extends IconProps {
-  size?: IconProps['width'];
+  readonly size?: IconProps['width'];
 }
 
 export default function Iconify({ icon, size = '1em', className = '', ...other }: Props) {

@@ -1,13 +1,15 @@
+import { DEFAULT_STAGGER_TIME } from './constant';
+
 interface Props {
-  staggerIn?: number;
-  delayIn?: number;
-  staggerOut?: number;
+  readonly staggerIn?: number;
+  readonly delayIn?: number;
+  readonly staggerOut?: number;
 }
 
 export const varContainer = (props?: Props) => {
-  const staggerIn = props?.staggerIn || 0.05;
-  const delayIn = props?.staggerIn || 0.05;
-  const staggerOut = props?.staggerIn || 0.05;
+  const staggerIn = props?.staggerIn || DEFAULT_STAGGER_TIME;
+  const delayIn = props?.staggerIn || DEFAULT_STAGGER_TIME;
+  const staggerOut = props?.staggerIn || DEFAULT_STAGGER_TIME;
 
   return {
     animate: {

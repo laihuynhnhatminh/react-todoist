@@ -14,7 +14,7 @@ import {
 } from './theme';
 
 type Props = {
-  children: React.ReactNode;
+  readonly children: React.ReactNode;
 };
 
 export default function AntdConfig({ children }: Props) {

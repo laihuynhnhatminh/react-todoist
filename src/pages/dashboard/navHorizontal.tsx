@@ -1,4 +1,4 @@
-export default function NavSidebar() {
+export default function NavHorizontal() {
   return (
     <header>
       <h1>NavSidebar</h1>

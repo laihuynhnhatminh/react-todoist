@@ -5,7 +5,7 @@ import { useThemeToken } from '@/hooks';
 import { Iconify } from '../icon';
 
 interface Props {
-  size?: number | string;
+  readonly size?: number | string;
 }
 
 export default function Logo({ size = 50 }: Props) {
@@ -13,7 +13,7 @@ export default function Logo({ size = 50 }: Props) {
 
   return (
     <NavLink to="/">
-      <Iconify icon="icon-park:view-list" color={colorPrimary} size={size} />
+      <Iconify icon="mdi-light:home" color={colorPrimary} size={size} />
     </NavLink>
   );
 }

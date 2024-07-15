@@ -1,7 +1,7 @@
 import Header from './header';
 import Main from './main';
 import Nav from './nav';
-import NavSidebar from './navSidebar';
+import NavHorizontal from './navHorizontal';
 
 export default function DashBoardLayout() {
   return (
@@ -9,7 +9,7 @@ export default function DashBoardLayout() {
       <Header />
       <Main />
       <Nav />
-      <NavSidebar />
+      <NavHorizontal />
     </div>
   );
 }

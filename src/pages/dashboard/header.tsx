@@ -1,17 +1,19 @@
+import { Drawer } from 'antd';
 import Color from 'color';
+import { CSSProperties, useState } from 'react';
+
+import { IconButton, Iconify, SvgIcon } from '@/components/icon';
+import Logo from '@/components/logo';
 import { ThemeLayout } from '@/enums';
 import { useThemeToken } from '@/hooks';
 import { useResponsive } from '@/hooks/useResponsive';
 import { useSettings } from '@/stores/settingStore';
-import { CSSProperties, useState } from 'react';
+
 import { HEADER_HEIGHT, NAV_COLLAPSED_WIDTH, NAV_WIDTH, OFFSET_HEADER_HEIGHT } from './config';
-import { Drawer } from 'antd';
-import Logo from '@/components/logo';
-import { IconButton, Iconify, SvgIcon } from '@/components/icon';
 
 interface Props {
-  className?: string;
-  offsetTop?: boolean;
+  readonly className?: string;
+  readonly offsetTop?: boolean;
 }
 
 export default function Header({ className = '', offsetTop = false }: Props) {
@@ -19,8 +21,6 @@ export default function Header({ className = '', offsetTop = false }: Props) {
   const { themeLayout, breadCrumb } = useSettings();
   const { colorBgElevated, colorBorder } = useThemeToken();
   const { screenMap } = useResponsive();
-
-  console.log();
 
   const headerStyle: CSSProperties = {
     position: themeLayout === ThemeLayout.Horizontal ? 'relative' : 'fixed',
@@ -56,7 +56,7 @@ export default function Header({ className = '', offsetTop = false }: Props) {
           <div className="flex items-baseline">
             {themeLayout !== ThemeLayout.Horizontal ? (
               <IconButton onClick={() => setOpenDrawer(true)} className="h-10 w-10 md:hidden">
-                <SvgIcon icon="menu-icon" size="24" />
+                <SvgIcon icon="ic-menu" size="24" />
               </IconButton>
             ) : (
               <Logo />
@@ -68,21 +68,6 @@ export default function Header({ className = '', offsetTop = false }: Props) {
           <div className="flex">
             <IconButton onClick={() => window.open('https://github.com/d3george/slash-admin')}>
               <Iconify icon="mdi:github" size={24} />
-            </IconButton>
-            <IconButton onClick={() => window.open('https://github.com/d3george/slash-admin')}>
-              <Iconify icon="mdi:github" size={24} />
-            </IconButton>
-            <IconButton onClick={() => window.open('https://github.com/d3george/slash-admin')}>
-              <Iconify icon="mdi:github" size={24} />
-            </IconButton>
-            <IconButton onClick={() => window.open('https://discord.gg/fXemAXVNDa')}>
-              <Iconify icon="carbon:logo-discord" size={24} />
-            </IconButton>
-            <IconButton onClick={() => window.open('https://discord.gg/fXemAXVNDa')}>
-              <Iconify icon="carbon:logo-discord" size={24} />
-            </IconButton>
-            <IconButton onClick={() => window.open('https://discord.gg/fXemAXVNDa')}>
-              <Iconify icon="carbon:logo-discord" size={24} />
             </IconButton>
             <IconButton onClick={() => window.open('https://discord.gg/fXemAXVNDa')}>
               <Iconify icon="carbon:logo-discord" size={24} />

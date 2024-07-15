@@ -3,7 +3,7 @@ import { useThemeToken } from '@/hooks';
 import SimpleHeader from '../common/simpleHeader';
 
 interface Props {
-  children: React.ReactNode;
+  readonly children: React.ReactNode;
 }
 
 export default function SimpleLayout({ children }: Props) {

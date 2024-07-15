@@ -49,8 +49,9 @@ export interface RouteMeta {
    */
   params?: Params<string>;
 }
-export type AppRouteObject = {
+
+export interface AppRouteObject extends Omit<RouteObject, 'children'> {
   order?: number;
   meta?: RouteMeta;
   children?: AppRouteObject[];
-} & Omit<RouteObject, 'children'>;
+}

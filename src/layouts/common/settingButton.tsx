@@ -1,8 +1,8 @@
 import { m } from 'framer-motion';
 import { useState } from 'react';
 
-import { varHover } from '@/components/animations/variants';
 import { IconButton, SvgIcon } from '@/components/icon';
+import { varHover } from '@/components/animations/variants';
 
 export default function SettingButton() {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -23,7 +23,7 @@ export default function SettingButton() {
         variants={varHover(1.05)}
       >
         <IconButton className="h-10 w-10">
-          <SvgIcon icon="setting-icon" size="24" />
+          <SvgIcon icon="ic-setting" size="24" />
         </IconButton>
       </m.div>
     </div>
