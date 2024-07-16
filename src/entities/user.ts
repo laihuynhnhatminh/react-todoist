@@ -1,11 +1,11 @@
 import { Role, BasicStatus } from '@/enums';
 
-export interface UserToken {
+export type UserToken = {
   accessToken?: string;
   refreshToken?: string;
-}
+};
 
-export interface UserInfo {
+export type UserInfo = {
   id: string;
   email: string;
   username: string;
@@ -13,4 +13,4 @@ export interface UserInfo {
   avatar?: string;
   role?: Role;
   status?: BasicStatus;
-}
+};

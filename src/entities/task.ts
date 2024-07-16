@@ -1,17 +1,17 @@
-export interface DueDate {
+export type DueDate = {
   date: string;
   is_recurring: boolean;
   datetime: string;
   string: string;
   timezone: string;
-}
+};
 
-export interface Duration {
+export type Duration = {
   amount: number;
   unit: 'minute' | 'day';
-}
+};
 
-export interface Task {
+export type Task = {
   creator_id: string;
   created_at: string;
   assignee_id: string | null;
@@ -30,4 +30,4 @@ export interface Task {
   section_id: string;
   parent_id: string;
   url: string;
-}
+};

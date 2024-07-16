@@ -1,13 +1,13 @@
 import { UserInfo, UserToken } from '@/entities';
 
-export interface SignInRequest {
+export type SignInRequest = {
   username: string;
   password: string;
 }
 
-export interface SignUpRequest extends SignInRequest {
+export type SignUpRequest = SignInRequest & {
   email: string;
 }
-export interface SignInResponse extends UserToken {
+export type SignInResponse = UserToken & {
   user: UserInfo;
 }

@@ -2,12 +2,12 @@ import { create } from 'zustand';
 
 import { Task } from '@/entities';
 
-interface TaskStore {
+type TaskStore = {
   tasks: Task[];
   actions: {
     setTasks: () => void;
   };
-}
+};
 
 const useTaskStore = create<TaskStore>((set) => ({
   tasks: [],

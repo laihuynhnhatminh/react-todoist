@@ -12,7 +12,7 @@ import { getItem, removeItem, setItem } from '@/utils/storage';
 
 const { VITE_APP_HOMEPAGE: HOMEPAGE } = import.meta.env;
 
-interface UserStore {
+type UserStore = {
   userInfo: Partial<UserInfo>;
   userToken: UserToken;
   actions: {
@@ -20,7 +20,7 @@ interface UserStore {
     setUserToken: (userToken: UserToken) => void;
     clearUserInfoAndToken: () => void;
   };
-}
+};
 
 const useUserStore = create<UserStore>((set) => ({
   userInfo: getItem<UserInfo>(StorageEnum.User) || {},
@@ -74,5 +74,3 @@ export const useSignIn = () => {
 
   return signIn;
 };
-
-export default useUserStore;

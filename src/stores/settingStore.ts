@@ -1,16 +1,16 @@
 import { create } from 'zustand';
 
-import { StorageEnum, ThemeColorPresets, ThemeLayout, ThemeMode } from '@/enums';
 import { Settings } from '@/entities';
+import { StorageEnum, ThemeColorPresets, ThemeLayout, ThemeMode } from '@/enums';
 import { getItem, removeItem, setItem } from '@/utils/storage';
 
-interface SettingStore {
+type SettingStore = {
   settings: Settings;
   actions: {
     setSettings: (settings: Settings) => void;
     clearSettings: () => void;
   };
-}
+};
 
 const useSettingStore = create<SettingStore>((set) => ({
   settings: getItem<Settings>(StorageEnum.Settings) || {

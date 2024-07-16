@@ -1,4 +1,4 @@
-export interface Project {
+export type Project = {
   id: string;
   name: string;
   comment_count: number;
@@ -10,4 +10,4 @@ export interface Project {
   is_team_inbox: boolean;
   view_style: string; // Change to enum?
   parent_id: string | null;
-}
+};

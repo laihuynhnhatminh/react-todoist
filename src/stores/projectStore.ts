@@ -2,12 +2,12 @@ import { create } from 'zustand';
 
 import { Project } from '@/entities';
 
-interface ProjectStore {
+type ProjectStore = {
   projects: Project[];
   actions: {
     setProjects: () => void;
   };
-}
+};
 
 const useProjectStore = create<ProjectStore>((set) => ({
   projects: [],
