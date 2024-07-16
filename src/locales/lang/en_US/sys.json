@@ -69,7 +69,7 @@
       "closeRight": "Close Right"
     },
     "menu": {
-      "dashboard": "Dashboard",
+      "main": "Main",
       "workbench": "Workbench",
       "analysis": "Analysis",
       "management": "Management",
