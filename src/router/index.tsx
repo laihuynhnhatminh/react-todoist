@@ -2,7 +2,7 @@ import { createBrowserRouter, Navigate, RouteObject, RouterProvider } from 'reac
 
 import MainLayout from '@/layouts/main';
 import { ErrorRoutes } from './routes/errorRoutes';
-import { usePermissionRoutes } from './hooks/usePermissionRoutes';
+import { usePermissionRoutes } from './hooks/useRoutesFromModules';
 import { AppRouteObject } from '@/entities';
 
 const { VITE_APP_HOMEPAGE: HOMEPAGE } = import.meta.env;

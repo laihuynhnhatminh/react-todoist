@@ -7,7 +7,7 @@ import { useLocation, useMatches, useNavigate } from 'react-router-dom';
 import Logo from '@/components/logo';
 import Scrollbar from '@/components/scrollbar';
 import { ThemeLayout } from '@/enums';
-import { usePermissionRoutes, useRouteToMenu } from '@/router/hooks';
+import { useRoutesFromModules, useRouteToMenu } from '@/router/hooks';
 import { menuFilter } from '@/router/utils';
 import { useSettings, useSettingActions } from '@/stores';
 import { useThemeToken } from '@/themes/hooks';
@@ -32,10 +32,11 @@ export default function Nav(props: Props) {
 
   /**
    * Route into Menu item
+   * TODO: Add a way to include a new menu route if in a project page
    */
   const routeToMenu = useRouteToMenu();
-  const permissionRoutes = usePermissionRoutes();
-  const menuRoutes = menuFilter(permissionRoutes);
+  const routesFromModules = useRoutesFromModules();
+  const menuRoutes = menuFilter(routesFromModules);
   const menuItems = routeToMenu(menuRoutes);
 
   /**
@@ -113,7 +114,7 @@ export default function Nav(props: Props) {
         </div>
         <button
           onClick={toggleCollapsed}
-          className="!text-gray absolute right-0 top-7 z-50 hidden h-6 w-6 translate-x-1/2 cursor-pointer select-none rounded-full text-center md:block"
+          className="absolute right-0 top-7 z-50 hidden h-6 w-6 translate-x-1/2 cursor-pointer select-none rounded-full text-center !text-gray md:block"
           style={{ color: colorTextBase, borderColor: colorTextBase, fontSize: 16 }}
         >
           {collapsed ? <MenuUnfoldOutlined size={20} /> : <MenuFoldOutlined size={20} />}

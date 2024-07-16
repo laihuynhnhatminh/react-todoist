@@ -3,9 +3,9 @@ import { useMemo } from 'react';
 import { getRoutesFromModules } from '../utils';
 
 /**
- * return routes about permission
+ * return routes
  */
-export function usePermissionRoutes() {
+export function useRoutesFromModules() {
   return useMemo(() => {
     return getRoutesFromModules();
   }, []);
