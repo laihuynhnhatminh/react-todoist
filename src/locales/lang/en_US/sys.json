@@ -70,8 +70,8 @@
     },
     "menu": {
       "main": "Main",
-      "workbench": "Workbench",
-      "analysis": "Analysis",
+      "dashboard": "Dashboard",
+      "log": "Log",
       "management": "Management",
       "user": {
         "index": "User",

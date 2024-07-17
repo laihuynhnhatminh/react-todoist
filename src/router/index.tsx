@@ -1,14 +1,15 @@
 import { createBrowserRouter, Navigate, RouteObject, RouterProvider } from 'react-router-dom';
 
-import MainLayout from '@/layouts/main';
-import { ErrorRoutes } from './routes/errorRoutes';
-import { usePermissionRoutes } from './hooks/useRoutesFromModules';
 import { AppRouteObject } from '@/entities';
+import MainLayout from '@/layouts/main';
+
+import { useRoutesFromModules } from './hooks/useRoutesFromModules';
+import { ErrorRoutes } from './routes/errorRoutes';
 
 const { VITE_APP_HOMEPAGE: HOMEPAGE } = import.meta.env;
 
 export default function Router() {
-  const permissionRoutes = usePermissionRoutes();
+  const permissionRoutes = useRoutesFromModules();
   const asyncRoutes: AppRouteObject = {
     path: '/',
     element: <MainLayout />,

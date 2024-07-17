@@ -5,14 +5,14 @@ import { Project } from '@/entities';
 type ProjectStore = {
   projects: Project[];
   actions: {
-    setProjects: () => void;
+    setProjects: (projects: Project[]) => void;
   };
 };
 
 const useProjectStore = create<ProjectStore>((set) => ({
   projects: [],
   actions: {
-    setProjects: () => set((state) => ({ projects: [...state.projects] })),
+    setProjects: (projects: Project[]) => set(() => ({ projects: [...projects] })),
   },
 }));
 
