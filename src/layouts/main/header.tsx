@@ -25,10 +25,7 @@ export default function Header({ className = '' }: Props) {
 
   const headerStyle: CSSProperties = {
     position: themeLayout === ThemeLayout.Horizontal ? 'relative' : 'fixed',
-    borderBottom:
-      themeLayout === ThemeLayout.Horizontal
-        ? `1px dashed ${Color(colorBorder).alpha(0.6).toString()}`
-        : '',
+    borderBottom: `1px dashed ${Color(colorBorder).alpha(0.6).toString()}`,
     backgroundColor: Color(colorBgElevated).alpha(1).toString(),
   };
 

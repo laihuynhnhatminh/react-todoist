@@ -17,7 +17,7 @@ export default function ProjectCard({ style, projectName, projectColor }: Props)
 
   return (
     <div
-      className="flex flex-col items-center rounded-2xl py-10"
+      className="flex flex-col items-center rounded-2xl py-12"
       style={{
         ...projectCardStyle,
         ...style,
