@@ -69,9 +69,7 @@
       "closeRight": "Close Right"
     },
     "menu": {
-      "main": "Main",
       "dashboard": "Dashboard",
-      "log": "Log",
       "management": "Management",
       "user": {
         "index": "User",

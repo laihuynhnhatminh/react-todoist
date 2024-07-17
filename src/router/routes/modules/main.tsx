@@ -1,39 +1,23 @@
 import { Suspense } from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
 
+import { Iconify } from '@/components/icon';
 import { CircleLoading } from '@/components/loading';
 import { AppRouteObject } from '@/entities/route';
-import Dashboard from '@/pages/main/dashboard';
-import TaskLog from '@/pages/main/log';
+import Dashboard from '@/pages/dashboard';
 
-const main: AppRouteObject = {
+const dashboard: AppRouteObject = {
   order: 1,
-  path: 'main',
+  path: 'dashboard',
   element: (
     <Suspense fallback={<CircleLoading />}>
-      <Outlet />
+      <Dashboard />,
     </Suspense>
   ),
   meta: {
-    label: 'sys.menu.main',
-    key: '/main',
+    label: 'sys.menu.dashboard',
+    icon: <Iconify icon="fa6-solid:table-cells-large" size={24} />,
+    key: '/dashboard',
   },
-  children: [
-    {
-      index: true,
-      element: <Navigate to="dashboard" replace />,
-    },
-    {
-      path: 'dashboard',
-      element: <Dashboard />,
-      meta: { label: 'sys.menu.dashboard', key: '/main/dashboard' },
-    },
-    {
-      path: 'log',
-      element: <TaskLog />,
-      meta: { label: 'sys.menu.log', key: '/main/log' },
-    },
-  ],
 };
 
-export default main;
+export default dashboard;
