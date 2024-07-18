@@ -1,28 +1,31 @@
-import { CSSProperties } from 'react';
-
+import Card from '@/components/card';
 import { Iconify } from '@/components/icon';
 
 type Props = {
-  readonly style?: CSSProperties;
+  readonly className?: string;
   readonly icon: string;
+  readonly iconColor: string;
   readonly title: string;
-  readonly currentValue: string;
-  readonly maxValue: string;
+  readonly text: string;
 };
 
-export default function DataCard({ style, icon, title, currentValue, maxValue }: Props) {
+export default function DataCard({ className = '', icon, iconColor, title, text }: Props) {
   return (
-    <div
-      className="flex flex-col items-center rounded-2xl py-12"
-      style={{
-        ...style,
-      }}
-    >
-      <Iconify icon={icon} size={24} />
-      <span className="text-sm">{title}</span>
-      <span className="text-2xl font-bold">
-        {currentValue} /{maxValue}
-      </span>
-    </div>
+    <Card className={`flex-col items-start ${className}`}>
+      <div
+        className="flex rounded-full p-4"
+        style={{
+          background: iconColor,
+        }}
+      >
+        <Iconify icon={icon} size={24} />
+      </div>
+      <div className="flex pt-4">
+        <h6 className="text-sm text-gray-600">{title}</h6>
+      </div>
+      <div className="flex p-2">
+        <span className="text-4xl font-bold">{text}</span>
+      </div>
+    </Card>
   );
 }
