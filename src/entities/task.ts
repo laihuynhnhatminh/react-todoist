@@ -31,3 +31,10 @@ export type Task = {
   parent_id: string;
   url: string;
 };
+
+export type TaskParameters = {
+  project_id?: string;
+  section_id?: string;
+  label?: string;
+  ids?: number[];
+};

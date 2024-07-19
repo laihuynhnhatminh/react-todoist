@@ -1,29 +1,20 @@
-import { useQuery } from '@tanstack/react-query';
 import { Col, Row, Typography } from 'antd';
 
-import { PROJECT_KEYS, TASK_KEYS } from '@/api/reactQuery/keys';
-import { getProjects } from '@/api/services/projectApi';
-import { getTasks } from '@/api/services/taskApi';
+import { useTaskByParams } from '@/api/hooks';
+import { useQueryProjects } from '@/api/hooks/projectHooks';
 import { CircleLoading } from '@/components/loading';
 import Scrollbar from '@/components/scrollbar';
-import { Project, Task } from '@/entities';
 import { useThemeToken } from '@/themes/hooks';
 
 import DataCard from './dataCard';
+import ImportantTaskLog from './importantTaskLog';
 import ProjectDashboard from './projectDashboard';
-import TaskList from './taskList';
 
 export default function Dashboard() {
   const { blue3, pink3, orange3 } = useThemeToken();
-  const { isLoading: isProjectLoading, data: projects } = useQuery<Project[]>({
-    queryKey: PROJECT_KEYS.all,
-    queryFn: getProjects,
-  });
+  const { isLoading: isProjectLoading, data: projects } = useQueryProjects();
 
-  const { isLoading: isTaskLoading, data: tasks } = useQuery<Task[]>({
-    queryKey: TASK_KEYS.all,
-    queryFn: getTasks,
-  });
+  const { isLoading: isTaskLoading, data: tasks } = useTaskByParams({ label: 'Important' });
 
   if (isProjectLoading || isTaskLoading) {
     return <CircleLoading />;
@@ -49,11 +40,11 @@ export default function Dashboard() {
             text={`${projects?.length} /6 Projects`}
           />
         </Col>
-        <Col key="createdTasks" lg={8} md={8} span={24}>
+        <Col key="importantTasks" lg={8} md={8} span={24}>
           <DataCard
             icon="fa6-solid:clipboard-list"
             iconColor={orange3}
-            title="Tasks Created"
+            title="Important Tasks"
             text={`${tasks?.length} Tasks`}
           />
         </Col>
@@ -66,7 +57,7 @@ export default function Dashboard() {
         </Col>
         <Col lg={12} md={24} span={24}>
           <Scrollbar style={{ maxHeight: '50vh' }}>
-            <TaskList tasks={tasks || []} />
+            <ImportantTaskLog tasks={tasks || []} />
           </Scrollbar>
         </Col>
       </Row>

@@ -8,7 +8,7 @@ type Props = {
   readonly tasks: Task[];
 };
 
-export default function TaskList({ tasks }: Props) {
+export default function ImportantTaskLog({ tasks }: Props) {
   return (
     <Card className="flex-col">
       <header>
