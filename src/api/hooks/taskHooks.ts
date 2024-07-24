@@ -4,8 +4,7 @@ import { Task } from '@/entities';
 import { TaskParameters } from '@/entities/task';
 
 import apiClient from '../apiClient';
-
-import { TASK_KEYS } from './queryKeys';
+import { TASK_KEYS } from '../shared/queryKeys';
 
 const TASK_PATH = '/tasks';
 

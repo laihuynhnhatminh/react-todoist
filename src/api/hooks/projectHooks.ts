@@ -3,8 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { CreateProjectRequest, Project } from '@/entities';
 
 import apiClient from '../apiClient';
-
-import { PROJECT_KEYS } from './queryKeys';
+import { PROJECT_KEYS } from '../shared/queryKeys';
 
 const PROJECT_PATH = '/projects';
 

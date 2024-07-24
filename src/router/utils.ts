@@ -22,12 +22,11 @@ export const menuFilter = (items: AppRouteObject[]) => {
  */
 export function getRoutesFromModules() {
   const menuModules: AppRouteObject[] = [];
-
   const modules = import.meta.glob('./routes/modules/**/*.tsx', { eager: true });
   Object.keys(modules).forEach((key) => {
-    const mod = (modules as any)[key].default || {};
-    const modList = Array.isArray(mod) ? [...mod] : [mod];
-    menuModules.push(...modList);
+    const module = (modules as any)[key].default || {};
+    const moduleList = Array.isArray(module) ? [...module] : [module];
+    menuModules.push(...moduleList);
   });
   return menuModules;
 }

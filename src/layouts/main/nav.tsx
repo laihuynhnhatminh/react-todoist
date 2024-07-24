@@ -2,7 +2,7 @@ import { MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons';
 import { Menu, MenuProps } from 'antd';
 import Color from 'color';
 import { CSSProperties, useEffect, useState } from 'react';
-import { useLocation, useMatches, useNavigate } from 'react-router-dom';
+import { NavLink, useLocation, useMatches, useNavigate } from 'react-router-dom';
 
 import Logo from '@/components/logo';
 import Scrollbar from '@/components/scrollbar';
@@ -13,6 +13,7 @@ import { useSettings, useSettingActions } from '@/stores';
 import { useThemeToken } from '@/themes/hooks';
 
 import { NAV_COLLAPSED_WIDTH, NAV_WIDTH } from './config';
+import { IconButton, Iconify } from '@/components/icon';
 
 type Props = {
   readonly closeSideBarDrawer?: () => void;
@@ -105,11 +106,11 @@ export default function Nav(props: Props) {
         <div className="flex items-center">
           <Logo />
           {themeLayout !== ThemeLayout.Mini && (
-            <div>
+            <NavLink to="/">
               <span className="ml-2 text-xl font-bold" style={{ color: colorPrimary }}>
                 React Todoist
               </span>
-            </div>
+            </NavLink>
           )}
         </div>
         <button
@@ -121,25 +122,34 @@ export default function Nav(props: Props) {
         </button>
       </div>
 
-      <Scrollbar
-        style={{
-          height: `calc(100vh - 70px)`,
-        }}
-      >
-        <Menu
-          mode={menuMode}
-          items={menuItems}
-          className="h-full !border-none"
-          defaultOpenKeys={openKeys}
-          defaultSelectedKeys={[pathname]}
-          selectedKeys={[pathname]}
-          openKeys={openKeys}
-          onOpenChange={onOpenChange}
-          onClick={onClick}
-          style={menuStyle}
-          inlineCollapsed={collapsed}
-        />
-      </Scrollbar>
+      <div className="flex flex-col justify-between">
+        <Scrollbar
+          className="flex"
+          style={{
+            height: `calc(100vh - 130px)`,
+          }}
+        >
+          <Menu
+            mode={menuMode}
+            items={menuItems}
+            className="h-full !border-none"
+            defaultOpenKeys={openKeys}
+            defaultSelectedKeys={[pathname]}
+            selectedKeys={[pathname]}
+            openKeys={openKeys}
+            onOpenChange={onOpenChange}
+            onClick={onClick}
+            style={menuStyle}
+            inlineCollapsed={collapsed}
+          />
+        </Scrollbar>
+        <div className="flex w-full">
+          <IconButton className="flex w-full gap-2 px-6" style={{ justifyContent: 'start' }}>
+            <Iconify icon="fa6-solid:right-from-bracket" size={24} />
+            <div>Sign Out</div>
+          </IconButton>
+        </div>
+      </div>
     </div>
   );
 }

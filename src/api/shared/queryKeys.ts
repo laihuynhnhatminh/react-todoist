@@ -14,3 +14,7 @@ export const TASK_KEYS = {
 };
 
 // Section Query Keys
+export const SECTION_KEYS = {
+  allSection: ['sections'] as const,
+  sectionOfProject: (id: string) => [...TASK_KEYS.allTasks, id] as const,
+};

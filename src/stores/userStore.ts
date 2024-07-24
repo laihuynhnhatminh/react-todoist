@@ -7,8 +7,9 @@ import { create } from 'zustand';
 import { SignInRequest } from '@/api/user/userApi.model';
 import userService from '@/api/user/userApi.service';
 import { UserInfo, UserToken } from '@/entities';
-import { StorageEnum } from '@/enums';
-import { getItem, removeItem, setItem } from '@/utils/storage';
+import { CookieEnum, StorageEnum } from '@/enums';
+import { getCookieItem, removeCookieItem, setCookieItem } from '@/utils/cookie';
+import { getStorageItem, removeStorageItem, setStorageItem } from '@/utils/storage';
 
 const { VITE_APP_HOMEPAGE: HOMEPAGE } = import.meta.env;
 
@@ -23,21 +24,21 @@ type UserStore = {
 };
 
 const useUserStore = create<UserStore>((set) => ({
-  userInfo: getItem<UserInfo>(StorageEnum.User) || {},
-  userToken: getItem<UserToken>(StorageEnum.Token) || {},
+  userInfo: getStorageItem<UserInfo>(StorageEnum.User) || {},
+  userToken: getCookieItem<UserToken>(CookieEnum.Token) || {},
   actions: {
     setUserInfo: (userInfo) => {
       set({ userInfo });
-      setItem(StorageEnum.User, userInfo);
+      setStorageItem(StorageEnum.User, userInfo);
     },
     setUserToken: (userToken) => {
       set({ userToken });
-      setItem(StorageEnum.Token, userToken);
+      setCookieItem(CookieEnum.Token, userToken);
     },
     clearUserInfoAndToken: () => {
       set({ userInfo: {}, userToken: {} });
-      removeItem(StorageEnum.User);
-      removeItem(StorageEnum.Token);
+      removeStorageItem(StorageEnum.User);
+      removeCookieItem(CookieEnum.Token);
     },
   },
 }));

@@ -12,7 +12,7 @@ export default function ImportantTaskLog({ tasks }: Props) {
   return (
     <Card className="flex-col">
       <header>
-        <Typography.Title level={3}>Tasks Log</Typography.Title>
+        <Typography.Title level={3}>Important Tasks</Typography.Title>
       </header>
       <main>
         <div className="flex flex-col gap-3">

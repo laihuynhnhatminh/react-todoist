@@ -32,7 +32,7 @@ export default function ProjectDashboard({ projects }: Props) {
               }}
             >
               <Link
-                to={`/projects/${project.id}`}
+                to={`/projects/${project.id}/kanban`}
                 replace
                 className="flex w-full flex-row justify-between"
               >
@@ -49,7 +49,7 @@ export default function ProjectDashboard({ projects }: Props) {
                   <IconButton
                     onClick={(e) => {
                       e.preventDefault();
-                      window.open(`${ROOT_URL}/projects/${project.id}`, '_blank');
+                      window.open(`${ROOT_URL}/projects/${project.id}/kanban`, '_blank');
                     }}
                     className="z-20"
                   >

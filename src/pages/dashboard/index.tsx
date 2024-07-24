@@ -1,4 +1,4 @@
-import { Col, Row, Typography } from 'antd';
+import { Col, Row } from 'antd';
 
 import { useTaskByParams } from '@/api/hooks';
 import { useQueryProjects } from '@/api/hooks/projectHooks';
@@ -6,9 +6,10 @@ import { CircleLoading } from '@/components/loading';
 import Scrollbar from '@/components/scrollbar';
 import { useThemeToken } from '@/themes/hooks';
 
-import DataCard from './dataCard';
-import ImportantTaskLog from './importantTaskLog';
-import ProjectDashboard from './projectDashboard';
+import DataCard from './components/dataCard';
+import GreetingCard from './components/greetingCard';
+import ImportantTaskLog from './components/importantTaskLog';
+import ProjectDashboard from './components/projectDashboard';
 
 export default function Dashboard() {
   const { blue3, pink3, orange3 } = useThemeToken();
@@ -22,8 +23,12 @@ export default function Dashboard() {
 
   return (
     <div className="p-2">
-      <Typography.Title level={2}>Hi, Welcome back 👋</Typography.Title>
-      <Row gutter={[16, 16]} className="my-2">
+      <Row gutter={[16, 16]} className="my-4">
+        <Col key="greetingCard" lg={24} md={24} span={24}>
+          <GreetingCard />
+        </Col>
+      </Row>
+      <Row gutter={[16, 16]} className="my-4">
         <Col key="signInDays" lg={8} md={8} span={24}>
           <DataCard
             icon="fa6-solid:lock"
@@ -49,14 +54,14 @@ export default function Dashboard() {
           />
         </Col>
       </Row>
-      <Row gutter={[16, 16]} className="my-2">
+      <Row gutter={[16, 16]} className="my-4">
         <Col lg={12} md={24} span={24}>
-          <Scrollbar style={{ maxHeight: '50vh' }}>
+          <Scrollbar>
             <ProjectDashboard projects={projects || []} />
           </Scrollbar>
         </Col>
         <Col lg={12} md={24} span={24}>
-          <Scrollbar style={{ maxHeight: '50vh' }}>
+          <Scrollbar>
             <ImportantTaskLog tasks={tasks || []} />
           </Scrollbar>
         </Col>

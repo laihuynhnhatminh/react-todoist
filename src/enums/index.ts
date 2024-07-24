@@ -1,6 +1,6 @@
 import { ResultEnum } from './api';
 import { LocaleEnum } from './locale';
-import { StorageEnum } from './storage';
+import { StorageEnum, CookieEnum } from './storage';
 import { ThemeLayout, ThemeColorPresets, ThemeMode } from './theme';
 import { TodoistColor, TodoistColorCode } from './todoistColor';
 import { Role, BasicStatus } from './user';
@@ -16,4 +16,5 @@ export {
   ResultEnum,
   TodoistColor,
   TodoistColorCode,
+  CookieEnum,
 };

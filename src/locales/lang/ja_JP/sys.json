@@ -71,6 +71,12 @@
     "menu": {
       "dashboard": "Dashboard",
       "management": "Management",
+      "testpage": "Test Page",
+      "project": {
+        "index": "Project",
+        "kanban": "Kanban",
+        "backlog": "Backlog"
+      },
       "user": {
         "index": "User",
         "profile": "Profile",

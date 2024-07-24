@@ -2,7 +2,7 @@ import { create } from 'zustand';
 
 import { Settings } from '@/entities';
 import { StorageEnum, ThemeColorPresets, ThemeLayout, ThemeMode } from '@/enums';
-import { getItem, removeItem, setItem } from '@/utils/storage';
+import { getStorageItem, removeStorageItem, setStorageItem } from '@/utils/storage';
 
 type SettingStore = {
   settings: Settings;
@@ -13,7 +13,7 @@ type SettingStore = {
 };
 
 const useSettingStore = create<SettingStore>((set) => ({
-  settings: getItem<Settings>(StorageEnum.Settings) || {
+  settings: getStorageItem<Settings>(StorageEnum.Settings) || {
     themeColorPresets: ThemeColorPresets.Default,
     themeLayout: ThemeLayout.Vertical,
     themeMode: ThemeMode.Light,
@@ -21,9 +21,9 @@ const useSettingStore = create<SettingStore>((set) => ({
   actions: {
     setSettings: (settings) => {
       set({ settings });
-      setItem(StorageEnum.Settings, settings);
+      setStorageItem(StorageEnum.Settings, settings);
     },
-    clearSettings: () => removeItem(StorageEnum.Settings),
+    clearSettings: () => removeStorageItem(StorageEnum.Settings),
   },
 }));
 
