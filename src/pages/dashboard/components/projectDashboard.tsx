@@ -51,7 +51,7 @@ export default function ProjectDashboard({ projects }: Props) {
                       e.preventDefault();
                       window.open(`${ROOT_URL}/projects/${project.id}/kanban`, '_blank');
                     }}
-                    className="z-20"
+                    className="hover:bg-transparent"
                   >
                     <Iconify icon="fa6-solid:arrow-up-right-from-square" size={20} />
                   </IconButton>

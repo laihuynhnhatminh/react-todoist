@@ -1,9 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
-
 import { CreateProjectRequest, Project } from '@/entities';
 
 import apiClient from '../apiClient';
-import { PROJECT_KEYS } from '../shared/queryKeys';
 
 const PROJECT_PATH = '/projects';
 
@@ -22,17 +19,3 @@ export const updateProject = (id: string, data: Partial<Project>) =>
 
 export const deleteProject = (id: string) =>
   apiClient.delete<Project>({ url: `${PROJECT_PATH}/${id}` });
-
-/* React Query hook */
-
-export const useQueryProjects = () =>
-  useQuery<Project[]>({
-    queryKey: PROJECT_KEYS.allProjects,
-    queryFn: getProjects,
-  });
-
-export const useQueryProjectDetail = (id: string) =>
-  useQuery<Project>({
-    queryKey: PROJECT_KEYS.project(id),
-    queryFn: () => getProjectDetail(id),
-  });

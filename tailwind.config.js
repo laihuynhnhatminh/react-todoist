@@ -21,6 +21,7 @@ export default {
       yellow: '#ffc82c',
       gray: '#637381',
       hover: '#63738114',
+      transparent: 'transparent',
 
       success: '#22c55e',
       warning: '#ff7849',
