@@ -18,13 +18,13 @@ export function useResponsive() {
     xxl: screenXXL,
   };
   const screenMap: ScreenMap = useBreakpoint();
-  const currentScrren = [...screenArray].reverse().find((item) => {
+  const currentScreen = [...screenArray].reverse().find((item) => {
     const result = screenMap[item];
     return result === true;
   });
   return {
     screenEnum,
     screenMap,
-    currentScrren,
+    currentScreen,
   };
 }

@@ -2,17 +2,18 @@ import { MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons';
 import { Menu, MenuProps } from 'antd';
 import Color from 'color';
 import { CSSProperties, useEffect, useState } from 'react';
-import { useLocation, useMatches, useNavigate } from 'react-router-dom';
+import { NavLink, useLocation, useMatches, useNavigate } from 'react-router-dom';
 
 import Logo from '@/components/logo';
 import Scrollbar from '@/components/scrollbar';
 import { ThemeLayout } from '@/enums';
-import { usePermissionRoutes, useRouteToMenu } from '@/router/hooks';
+import { useRoutesFromModules, useRouteToMenu } from '@/router/hooks';
 import { menuFilter } from '@/router/utils';
 import { useSettings, useSettingActions } from '@/stores';
 import { useThemeToken } from '@/themes/hooks';
 
 import { NAV_COLLAPSED_WIDTH, NAV_WIDTH } from './config';
+import { IconButton, Iconify } from '@/components/icon';
 
 type Props = {
   readonly closeSideBarDrawer?: () => void;
@@ -32,10 +33,11 @@ export default function Nav(props: Props) {
 
   /**
    * Route into Menu item
+   * TODO: Add a way to include a new menu route if in a project page
    */
   const routeToMenu = useRouteToMenu();
-  const permissionRoutes = usePermissionRoutes();
-  const menuRoutes = menuFilter(permissionRoutes);
+  const routesFromModules = useRoutesFromModules();
+  const menuRoutes = menuFilter(routesFromModules);
   const menuItems = routeToMenu(menuRoutes);
 
   /**
@@ -104,41 +106,50 @@ export default function Nav(props: Props) {
         <div className="flex items-center">
           <Logo />
           {themeLayout !== ThemeLayout.Mini && (
-            <div>
+            <NavLink to="/">
               <span className="ml-2 text-xl font-bold" style={{ color: colorPrimary }}>
                 React Todoist
               </span>
-            </div>
+            </NavLink>
           )}
         </div>
         <button
           onClick={toggleCollapsed}
-          className="!text-gray absolute right-0 top-7 z-50 hidden h-6 w-6 translate-x-1/2 cursor-pointer select-none rounded-full text-center md:block"
+          className="absolute right-0 top-7 z-50 hidden h-6 w-6 translate-x-1/2 cursor-pointer select-none rounded-full text-center !text-gray md:block"
           style={{ color: colorTextBase, borderColor: colorTextBase, fontSize: 16 }}
         >
           {collapsed ? <MenuUnfoldOutlined size={20} /> : <MenuFoldOutlined size={20} />}
         </button>
       </div>
 
-      <Scrollbar
-        style={{
-          height: `calc(100vh - 70px)`,
-        }}
-      >
-        <Menu
-          mode={menuMode}
-          items={menuItems}
-          className="h-full !border-none"
-          defaultOpenKeys={openKeys}
-          defaultSelectedKeys={[pathname]}
-          selectedKeys={[pathname]}
-          openKeys={openKeys}
-          onOpenChange={onOpenChange}
-          onClick={onClick}
-          style={menuStyle}
-          inlineCollapsed={collapsed}
-        />
-      </Scrollbar>
+      <div className="flex flex-col justify-between">
+        <Scrollbar
+          className="flex"
+          style={{
+            height: `calc(100vh - 130px)`,
+          }}
+        >
+          <Menu
+            mode={menuMode}
+            items={menuItems}
+            className="h-full !border-none"
+            defaultOpenKeys={openKeys}
+            defaultSelectedKeys={[pathname]}
+            selectedKeys={[pathname]}
+            openKeys={openKeys}
+            onOpenChange={onOpenChange}
+            onClick={onClick}
+            style={menuStyle}
+            inlineCollapsed={collapsed}
+          />
+        </Scrollbar>
+        <div className="flex w-full">
+          <IconButton className="flex w-full gap-2 px-6" style={{ justifyContent: 'start' }}>
+            <Iconify icon="fa6-solid:right-from-bracket" size={24} />
+            <div>Sign Out</div>
+          </IconButton>
+        </div>
+      </div>
     </div>
   );
 }

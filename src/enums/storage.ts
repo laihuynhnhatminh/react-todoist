@@ -4,3 +4,7 @@ export enum StorageEnum {
   Settings = 'settings',
   I18N = 'i18nextLng',
 }
+
+export enum CookieEnum {
+  Token = 'token',
+}

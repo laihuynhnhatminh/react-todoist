@@ -16,7 +16,7 @@ const axiosInstance = axios.create({
 // Intercept request for bearer token
 axiosInstance.interceptors.request.use(
   (config) => {
-    config.headers.Authorization = 'Bearer Token';
+    config.headers.Authorization = `Bearer ${import.meta.env.VITE_APP_TODOIST_TOKEN}`;
     return config;
   },
   (error: Error | AxiosError) => {
@@ -31,19 +31,21 @@ axiosInstance.interceptors.response.use(
       throw new Error(t('sys.api.apiRequestFailed'));
     }
 
-    const { status, data, message } = res.data;
-    const hasSuccess = data && Reflect.has(res.data, 'status') && status === ResultEnum.SUCCESS;
+    const { status, data } = res;
+
+    const hasSuccess = data && Reflect.has(res, 'status') && status === ResultEnum.SUCCESS;
+
     if (hasSuccess) {
-      return data;
+      return res;
     }
 
-    throw new Error(message || t('sys.api.apiRequestFailed'));
+    throw new Error(t('sys.api.apiRequestFailed'));
   },
   (error: AxiosError<Result>) => {
     const { response, message } = error || {};
     const userActions = useUserActions();
 
-    const errorMessage = response?.data?.message || message || t('sys.api.errorMessage');
+    const errorMessage = message || t('sys.api.errorMessage');
     Message.error(errorMessage);
 
     const status = response?.status;
@@ -76,7 +78,7 @@ class APIClient {
       axiosInstance
         .request<any, AxiosResponse<Result>>(config)
         .then((res: AxiosResponse<Result>) => {
-          resolve(res as unknown as Promise<T>);
+          resolve(res.data as unknown as Promise<T>);
         })
         .catch((error: Error | AxiosError) => {
           reject(error);

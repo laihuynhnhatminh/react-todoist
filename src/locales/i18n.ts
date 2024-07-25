@@ -3,12 +3,12 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 import { initReactI18next } from 'react-i18next';
 
 import { LocaleEnum, StorageEnum } from '@/enums';
-import { getStringItem } from '@/utils/storage';
+import { getStorageStringItem } from '@/utils/storage';
 
 import en_US from './lang/en_US';
 import ja_JP from './lang/ja_JP';
 
-const defaultLng = getStringItem(StorageEnum.I18N) || LocaleEnum.en_US;
+const defaultLng = getStorageStringItem(StorageEnum.I18N) || LocaleEnum.en_US;
 
 i18n
   // detect user language

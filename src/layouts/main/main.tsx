@@ -4,16 +4,18 @@ import { Outlet } from 'react-router-dom';
 
 import { ThemeLayout } from '@/enums';
 import { useSettings } from '@/stores';
-import { useResponsive } from '@/themes/hooks';
+import { useResponsive, useThemeToken } from '@/themes/hooks';
 
 import { HEADER_HEIGHT, NAV_COLLAPSED_WIDTH, NAV_WIDTH } from './config';
 
 const Main = forwardRef<HTMLElement>((_, ref) => {
   const { themeLayout } = useSettings();
+  const { colorFillSecondary } = useThemeToken();
   const { screenMap } = useResponsive();
 
   const mainStyle: CSSProperties = {
     paddingTop: HEADER_HEIGHT,
+    background: colorFillSecondary,
     transition: 'padding 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms',
     width: '100%',
   };
