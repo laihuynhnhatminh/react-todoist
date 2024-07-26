@@ -1,6 +1,7 @@
 import { ResultEnum } from './api';
 import { LocaleEnum } from './locale';
 import { StorageEnum, CookieEnum } from './storage';
+import { TaskPriority } from './task';
 import { ThemeLayout, ThemeColorPresets, ThemeMode } from './theme';
 import { TodoistColor, TodoistColorCode } from './todoistColor';
 import { Role, BasicStatus } from './user';
@@ -17,4 +18,5 @@ export {
   TodoistColor,
   TodoistColorCode,
   CookieEnum,
+  TaskPriority,
 };

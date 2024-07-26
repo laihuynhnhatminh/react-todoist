@@ -126,7 +126,7 @@ export default function Nav(props: Props) {
         <Scrollbar
           className="flex"
           style={{
-            height: `calc(100vh - 130px)`,
+            height: `calc(100dvh - 130px)`,
           }}
         >
           <Menu

@@ -13,37 +13,40 @@ import { Typography } from 'antd';
 import { useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 
-import { getProjectDetail, getSectionsOfProject } from '@/api/services';
+import { getProjectDetail, getSections } from '@/api/services';
 import { PROJECT_KEYS, SECTION_KEYS } from '@/api/shared/queryKeys';
-import { IconButton, Iconify } from '@/components/icon';
+import { IconButton, SvgIcon } from '@/components/icon';
 import { CircleLoading } from '@/components/loading';
-import { RequiredIdParam, Section } from '@/entities';
+import { RequiredIdParam, Section, Task } from '@/entities';
 import { useRequiredParams } from '@/router/hooks';
 import { useProjectStore } from '@/stores';
 import { useProjectStoreActions } from '@/stores/projectStore';
 
-import KanbanSection from './components/kanbanSection';
+import SectionColumn from './components/sectionColumn';
+import TaskCard from './components/taskCard';
 
 export default function KanbanBoard() {
   const { id } = useRequiredParams<RequiredIdParam>();
   const { sections, project } = useProjectStore();
-  const { setSections, setProject, removeSection } = useProjectStoreActions();
+  const { setSections, setProject } = useProjectStoreActions();
+
+  /* Query/Muation fn */
   const { isLoading } = useQueries({
     queries: [
       {
         queryKey: PROJECT_KEYS.project(id),
         queryFn: async () => {
-          const res = await getProjectDetail(id);
-          setProject(res);
-          return res;
+          const projectDetail = await getProjectDetail(id);
+          setProject(projectDetail);
+          return projectDetail;
         },
       },
       {
         queryKey: SECTION_KEYS.sectionOfProject(id),
         queryFn: async () => {
-          const res = await getSectionsOfProject(id);
-          setSections(res);
-          return res;
+          const sections = await getSections(id);
+          setSections(sections);
+          return sections;
         },
       },
     ],
@@ -52,8 +55,11 @@ export default function KanbanBoard() {
       isLoading: res.some((r) => r.isLoading),
     }),
   });
+
+  /* Dnd setup */
   const sectionIds = useMemo(() => sections.map((section) => section.id), [sections]);
   const [activeSection, setActiveSection] = useState<Section | null>(null);
+  const [activeTask, setActiveTask] = useState<Task | null>(null);
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -67,15 +73,15 @@ export default function KanbanBoard() {
     console.log('Adding a new column');
   };
 
-  const deleteSection = (sectionId: string) => {
-    removeSection(sectionId);
-    console.log(sections);
-  };
-
   /* Events */
   const onDragStart = (event: DragStartEvent) => {
     if (event.active.data.current?.type === 'Section') {
       setActiveSection(event.active.data.current?.section);
+      return;
+    }
+
+    if (event.active.data.current?.type === 'Task') {
+      setActiveTask(event.active.data.current?.task);
     }
   };
 
@@ -104,25 +110,24 @@ export default function KanbanBoard() {
       <Typography.Title level={3}>{project?.name}</Typography.Title>
       <DndContext onDragStart={onDragStart} onDragEnd={onDragEnd} sensors={sensors}>
         <div className="m-4 flex flex-row justify-start gap-4">
-          <div className="flex gap-2">
+          <div className="flex gap-6">
             <SortableContext items={sectionIds}>
               {sections.map((section) => (
-                <KanbanSection key={section.id} section={section} deleteSection={deleteSection} />
+                <SectionColumn key={section.id} section={section} />
               ))}
             </SortableContext>
             <IconButton
               onClick={addNewSection}
               className="mt-4 flex h-[40px] w-[350px] min-w-[350px] cursor-pointer items-center justify-center gap-2 rounded-lg p-4"
             >
-              <Iconify icon="fa6-solid:circle-plus" size={20} /> Add Section
+              <SvgIcon icon="ic-plus" size={20} /> Add Section
             </IconButton>
           </div>
         </div>
         {createPortal(
           <DragOverlay>
-            {activeSection && (
-              <KanbanSection section={activeSection} deleteSection={deleteSection} />
-            )}
+            {activeSection && <SectionColumn section={activeSection} />}
+            {activeTask && <TaskCard task={activeTask} />}
           </DragOverlay>,
           document.body,
         )}

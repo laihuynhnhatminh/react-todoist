@@ -1,8 +1,7 @@
 import { message as Message } from 'antd';
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse, HttpStatusCode } from 'axios';
 import { t } from 'i18next';
 
-import { ResultEnum } from '@/enums';
 import { useUserActions } from '@/stores/userStore';
 
 import { Result } from './shared/api';
@@ -33,7 +32,15 @@ axiosInstance.interceptors.response.use(
 
     const { status, data } = res;
 
-    const hasSuccess = data && Reflect.has(res, 'status') && status === ResultEnum.SUCCESS;
+    const hasSuccess =
+      data &&
+      Reflect.has(res, 'status') &&
+      [
+        HttpStatusCode.Ok,
+        HttpStatusCode.Created,
+        HttpStatusCode.Accepted,
+        HttpStatusCode.NoContent,
+      ].includes(status);
 
     if (hasSuccess) {
       return res;

@@ -5,5 +5,14 @@ export type Section = {
   project_id: string;
   order: number;
   name: string;
-  tasks?: Task[];
+  tasks: Task[];
+};
+
+export type CreateSectionDto = {
+  projectId: string;
+  name: string;
+};
+
+export type UpdateSectionDto = {
+  name: string;
 };

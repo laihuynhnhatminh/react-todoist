@@ -22,6 +22,7 @@ export default {
       gray: '#637381',
       hover: '#63738114',
       transparent: 'transparent',
+      currentColor: 'currentColor',
 
       success: '#22c55e',
       warning: '#ff7849',

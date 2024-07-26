@@ -29,7 +29,7 @@
 
 body {
   position: relative;
-  min-height: 100vh;
+  min-height: 100dvh;
   font-size: 100%;
   line-height: 1.5;
 }

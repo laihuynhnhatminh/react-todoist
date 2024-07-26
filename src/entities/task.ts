@@ -1,3 +1,5 @@
+import { TaskPriority } from '@/enums';
+
 export type DueDate = {
   date: string;
   is_recurring: boolean;
@@ -25,7 +27,7 @@ export type Task = {
   duration: Duration | null;
   labels: string[];
   order: number;
-  priority: number;
+  priority: TaskPriority;
   project_id: string;
   section_id: string;
   parent_id: string;
@@ -37,4 +39,16 @@ export type TaskParameters = {
   section_id?: string;
   label?: string;
   ids?: number[];
+};
+
+export type CreateTaskDto = {
+  content: string;
+  description?: string;
+  project_id: string;
+  section_id: string;
+  parent_id?: string;
+  order?: number;
+  priority?: TaskPriority;
+  due_date?: DueDate;
+  duration?: Duration;
 };

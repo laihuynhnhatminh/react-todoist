@@ -1,4 +1,4 @@
-import { TaskParameters } from '@/entities/task';
+import { TaskParameters } from '@/entities';
 
 // Projects Query Keys
 export const PROJECT_KEYS = {
@@ -16,5 +16,5 @@ export const TASK_KEYS = {
 // Section Query Keys
 export const SECTION_KEYS = {
   allSection: ['sections'] as const,
-  sectionOfProject: (id: string) => [...TASK_KEYS.allTasks, id] as const,
+  sectionOfProject: (id: string) => [...SECTION_KEYS.allSection, id] as const,
 };
