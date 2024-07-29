@@ -6,9 +6,11 @@ import { Project, Section, Task, UpdateSectionDto } from '@/entities';
 type ProjectStore = {
   project: Project | null;
   sections: Section[];
+  tasks: Task[];
   actions: {
     setProject: (projects: Project) => void;
     setSections: (sections: Section[]) => void;
+    setTasks: (tasks: Task[]) => void;
     setSectionTasks: (sectionId: string, tasks: Task[]) => void;
     addNewSection: (section: Section) => void;
     updateSectionDetail: (sectionId: string, data: UpdateSectionDto) => void;
@@ -20,8 +22,10 @@ type ProjectStore = {
 const useProjectStore = create<ProjectStore>((set) => ({
   project: null,
   sections: [],
+  tasks: [],
   actions: {
     setProject: (project) => set(() => ({ project: clone(project) })),
+    setTasks: (tasks) => set(() => ({ tasks: clone(tasks) })),
     setSections: (sections) => set(() => ({ sections: clone(sections) })),
     setSectionTasks: (sectionId, tasks) =>
       set((state) => ({

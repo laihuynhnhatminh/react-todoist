@@ -32,7 +32,7 @@ export default function TaskCard({ task }: Props) {
 
   const taskCardStyle: CSSProperties = {
     transition,
-    transform: CSS.Transform.toString(transform),
+    transform: CSS.Translate.toString(transform),
     backgroundColor:
       themeMode === ThemeMode.Light ? colorBgContainerDisabled : 'rgba(145, 158, 171, 0.12)',
   };

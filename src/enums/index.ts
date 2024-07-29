@@ -1,4 +1,5 @@
 import { ResultEnum } from './api';
+import { TodoistCommandTypeEnum } from './command';
 import { LocaleEnum } from './locale';
 import { StorageEnum, CookieEnum } from './storage';
 import { TaskPriority } from './task';
@@ -19,4 +20,5 @@ export {
   TodoistColorCode,
   CookieEnum,
   TaskPriority,
+  TodoistCommandTypeEnum,
 };

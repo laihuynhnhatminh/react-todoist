@@ -1,10 +1,7 @@
-import { SortableContext, useSortable } from '@dnd-kit/sortable';
+import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { useQuery } from '@tanstack/react-query';
 import { CSSProperties, useMemo, useState } from 'react';
 
-import { getTaskByParams } from '@/api/services';
-import { TASK_KEYS } from '@/api/shared/queryKeys';
 import { IconButton, SvgIcon } from '@/components/icon';
 import { Section, UpdateSectionDto } from '@/entities';
 import { ThemeMode } from '@/enums';
@@ -22,18 +19,7 @@ export default function SectionColumn({ section }: Props) {
   const [editMode, setEditMode] = useState(false);
   const { colorBgContainer, colorBgContainerDisabled, colorPrimaryBgHover } = useThemeToken();
   const { themeMode } = useSettings();
-  const { setSectionTasks, updateSectionDetail, removeSection, addNewTask } =
-    useProjectStoreActions();
-
-  const { data = [] } = useQuery({
-    queryKey: TASK_KEYS.tasksByParams({ section_id: section.id }),
-    queryFn: async () => {
-      const tasks = await getTaskByParams({ section_id: section.id });
-      setSectionTasks(section.id, tasks);
-
-      return tasks;
-    },
-  });
+  const { updateSectionDetail, removeSection, addNewTask } = useProjectStoreActions();
 
   const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
     id: section.id,
@@ -45,12 +31,12 @@ export default function SectionColumn({ section }: Props) {
   });
 
   const taskIds = useMemo(() => {
-    return data.map((task) => task.id);
-  }, [data]);
+    return section?.tasks.map((task) => task.id);
+  }, [section]);
 
   const sectionStyle: CSSProperties = {
     transition,
-    transform: CSS.Transform.toString(transform),
+    transform: CSS.Translate.toString(transform),
     backgroundColor: themeMode === ThemeMode.Light ? colorBgContainer : 'rgba(145, 158, 171, 0.12)',
   };
 
@@ -87,7 +73,7 @@ export default function SectionColumn({ section }: Props) {
       <div
         ref={setNodeRef}
         style={sectionStyle}
-        className="flex max-h-[70dvh] w-[350px] flex-col rounded-2xl p-4 opacity-40"
+        className="flex w-[350px] flex-col rounded-2xl p-4 opacity-40"
       />
     );
   }
@@ -96,7 +82,7 @@ export default function SectionColumn({ section }: Props) {
     <div
       ref={setNodeRef}
       style={sectionStyle}
-      className="flex h-max max-h-[70dvh] w-[350px] flex-col rounded-2xl p-4"
+      className="flex h-fit w-[350px] flex-col rounded-2xl p-4"
     >
       {/* Section title */}
       <div
@@ -114,7 +100,7 @@ export default function SectionColumn({ section }: Props) {
             }}
             className="flex items-center justify-center rounded-full px-2 py-1 text-sm"
           >
-            {section.order}
+            {section.section_order}
           </div>
           {!editMode && section.name}
           {editMode && (
@@ -141,7 +127,7 @@ export default function SectionColumn({ section }: Props) {
 
       {/* Section task container */}
       <div className="flex flex-grow flex-col gap-4 overflow-y-auto overflow-x-hidden p-2">
-        <SortableContext items={taskIds}>
+        <SortableContext strategy={verticalListSortingStrategy} items={taskIds}>
           {section.tasks?.length > 0 &&
             section.tasks.map((task) => <TaskCard key={task.id} task={task} />)}
         </SortableContext>

@@ -1,13 +1,22 @@
 import { TodoistColor } from '@/enums';
 
+import { Section } from './section';
+import { Task } from './task';
+
 export type ProjectStyle = 'board';
+
+export type ProjectDetails = {
+  items: Task[];
+  sections: Section[];
+  project: Project;
+};
 
 export type Project = {
   id: string;
   name: string;
   comment_count: number;
   order: number;
-  color: TodoistColor; // Change to colorEnum?
+  color: TodoistColor;
   is_shared: boolean;
   is_favorite: boolean;
   is_inbox_project: boolean;

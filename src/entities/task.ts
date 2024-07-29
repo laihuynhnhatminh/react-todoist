@@ -26,12 +26,13 @@ export type Task = {
   due: DueDate | null;
   duration: Duration | null;
   labels: string[];
-  order: number;
+  child_order: number;
   priority: TaskPriority;
   project_id: string;
   section_id: string;
   parent_id: string;
   url: string;
+  updated_at: string;
 };
 
 export type TaskParameters = {

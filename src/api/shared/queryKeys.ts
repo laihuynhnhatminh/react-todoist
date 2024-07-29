@@ -1,5 +1,10 @@
 import { TaskParameters } from '@/entities';
 
+// Synced Resources Query Keys
+export const SYNCED_KEYS = {
+  syncResources: (resourceTypes: string[]) => [...resourceTypes] as const,
+};
+
 // Projects Query Keys
 export const PROJECT_KEYS = {
   allProjects: ['projects'] as const,

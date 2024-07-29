@@ -1,8 +1,8 @@
-import { useQueries } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Col, Row } from 'antd';
 
-import { getProjects, getTaskByParams } from '@/api/services';
-import { PROJECT_KEYS, TASK_KEYS } from '@/api/shared/queryKeys';
+import { getTodoistSyncedResources } from '@/api/services';
+import { SYNCED_KEYS } from '@/api/shared/queryKeys';
 import { CircleLoading } from '@/components/loading';
 import Scrollbar from '@/components/scrollbar';
 import { useThemeToken } from '@/themes/hooks';
@@ -15,25 +15,12 @@ import ProjectDashboard from './components/projectDashboard';
 export default function Dashboard() {
   const { blue3, pink3, orange3 } = useThemeToken();
 
-  const { isLoading, projects, tasks } = useQueries({
-    queries: [
-      {
-        queryKey: PROJECT_KEYS.allProjects,
-        queryFn: getProjects,
-      },
-      {
-        queryKey: TASK_KEYS.tasksByParams({ label: 'Important' }),
-        queryFn: () => getTaskByParams({ label: 'Important' }),
-      },
-    ],
-    combine: (results) => ({
-      isLoading: results.some((res) => res.isLoading),
-      projects: results[0].data ?? [],
-      tasks: results[1].data ?? [],
-    }),
+  const { isLoading, data } = useQuery({
+    queryKey: SYNCED_KEYS.syncResources(['projects', 'items']),
+    queryFn: () => getTodoistSyncedResources('*', ['projects', 'items']),
   });
 
-  if (isLoading) {
+  if (isLoading || !data) {
     return <CircleLoading />;
   }
 
@@ -58,7 +45,7 @@ export default function Dashboard() {
             icon="fa6-solid:briefcase"
             iconColor={pink3}
             title="Projects Created"
-            text={`${projects.length} /6 Projects`}
+            text={`${data.projects?.length} /6 Projects`}
           />
         </Col>
         <Col key="importantTasks" lg={8} md={8} span={24}>
@@ -66,19 +53,19 @@ export default function Dashboard() {
             icon="fa6-solid:clipboard-list"
             iconColor={orange3}
             title="Important Tasks"
-            text={`${tasks.length} Tasks`}
+            text={`${data.items?.length} Tasks`}
           />
         </Col>
       </Row>
       <Row gutter={[16, 16]} className="my-4">
         <Col lg={12} md={24} span={24}>
           <Scrollbar>
-            <ProjectDashboard projects={projects} />
+            <ProjectDashboard projects={data.projects || []} />
           </Scrollbar>
         </Col>
         <Col lg={12} md={24} span={24}>
           <Scrollbar>
-            <ImportantTaskLog tasks={tasks} />
+            <ImportantTaskLog tasks={data.items || []} />
           </Scrollbar>
         </Col>
       </Row>
