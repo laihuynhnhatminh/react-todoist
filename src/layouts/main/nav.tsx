@@ -4,6 +4,7 @@ import Color from 'color';
 import { CSSProperties, useEffect, useState } from 'react';
 import { NavLink, useLocation, useMatches, useNavigate } from 'react-router-dom';
 
+import { IconButton, Iconify } from '@/components/icon';
 import Logo from '@/components/logo';
 import Scrollbar from '@/components/scrollbar';
 import { ThemeLayout } from '@/enums';
@@ -13,7 +14,6 @@ import { useSettings, useSettingActions } from '@/stores';
 import { useThemeToken } from '@/themes/hooks';
 
 import { NAV_COLLAPSED_WIDTH, NAV_WIDTH } from './config';
-import { IconButton, Iconify } from '@/components/icon';
 
 type Props = {
   readonly closeSideBarDrawer?: () => void;
@@ -146,7 +146,7 @@ export default function Nav(props: Props) {
         <div className="flex w-full">
           <IconButton className="flex w-full gap-2 px-6" style={{ justifyContent: 'start' }}>
             <Iconify icon="fa6-solid:right-from-bracket" size={24} />
-            <div>Sign Out</div>
+            {!collapsed && <div>Sign Out</div>}
           </IconButton>
         </div>
       </div>

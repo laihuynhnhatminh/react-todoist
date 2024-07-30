@@ -3,9 +3,9 @@ import { CSS } from '@dnd-kit/utilities';
 import { CSSProperties, useState } from 'react';
 
 import { IconButton, SvgIcon } from '@/components/icon';
-import { Section, Task } from '@/entities';
+import { Task } from '@/entities';
 import { ThemeMode } from '@/enums';
-import { useProjectStore, useSettings } from '@/stores';
+import { useSettings } from '@/stores';
 import { useThemeToken } from '@/themes/hooks';
 
 type Props = {
@@ -17,10 +17,6 @@ export default function TaskCard({ task }: Props) {
   const [editMode, setEditMode] = useState(false);
   const { colorBgContainerDisabled } = useThemeToken();
   const { themeMode } = useSettings();
-  const {
-    sections,
-    actions: { setSectionTasks },
-  } = useProjectStore();
   const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
     id: task.id,
     data: {
@@ -37,27 +33,17 @@ export default function TaskCard({ task }: Props) {
       themeMode === ThemeMode.Light ? colorBgContainerDisabled : 'rgba(145, 158, 171, 0.12)',
   };
 
-  const currentSection = sections.find((section) => section.id === task.section_id) as Section;
-
   const toggleEditMode = () => {
     setEditMode((prev) => !prev);
     setMouseIsOver(false);
   };
 
   const updateTask = (taskId: string, data: Partial<Task>) => {
-    const newTasks = currentSection?.tasks.map((task) => {
-      if (task.id !== taskId) return task;
-
-      return { ...task, ...data };
-    });
-
-    setSectionTasks(currentSection.id, newTasks);
+    console.log(taskId, data);
   };
 
   const deleteTask = (taskId: string) => {
-    const newTasks = currentSection?.tasks.filter((task) => task.id !== taskId);
-
-    setSectionTasks(currentSection.id, newTasks);
+    console.log(taskId);
   };
 
   if (isDragging) {
@@ -91,22 +77,12 @@ export default function TaskCard({ task }: Props) {
           onChange={(e) => updateTask(task.id, { content: e.target.value })}
           className="h-[90%] w-full resize-none rounded border-none bg-transparent focus:outline-none"
         />
-
-        {mouseIsOver && (
-          <IconButton
-            onClick={() => deleteTask(task.id)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 rounded bg-transparent p-2 opacity-60 hover:opacity-100"
-          >
-            <SvgIcon icon="ic-trash" size={20} />
-          </IconButton>
-        )}
       </div>
     );
   }
 
   return (
     <div
-      onClick={toggleEditMode}
       onMouseEnter={() => setMouseIsOver(true)}
       onMouseLeave={() => setMouseIsOver(false)}
       ref={setNodeRef}
@@ -115,7 +91,10 @@ export default function TaskCard({ task }: Props) {
       {...listeners}
       className="relative h-[100px] min-h-[100px] cursor-grab items-center rounded-xl p-2.5 text-left hover:ring-2 hover:ring-inset hover:ring-blue"
     >
-      <p className="my-auto h-[90%] w-full overflow-x-hidden overflow-y-hidden whitespace-pre-wrap hover:overflow-y-auto">
+      <p
+        onClick={toggleEditMode}
+        className="my-auto h-[90%] w-full overflow-x-hidden overflow-y-hidden whitespace-pre-wrap hover:overflow-y-auto"
+      >
         {task.content}
       </p>
       {mouseIsOver && (

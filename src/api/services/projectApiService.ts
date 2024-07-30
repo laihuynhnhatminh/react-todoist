@@ -1,4 +1,4 @@
-import { CreateProjectRequest, Project, ProjectDetails } from '@/entities';
+import { ProjectDetails } from '@/entities';
 
 import apiClient from '../apiClient';
 

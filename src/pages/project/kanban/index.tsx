@@ -12,27 +12,44 @@ import {
 import { arrayMove, horizontalListSortingStrategy, SortableContext } from '@dnd-kit/sortable';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Typography } from 'antd';
-import { useMemo, useState } from 'react';
+import { CSSProperties, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { v4 as uuidv4 } from 'uuid';
+import { useForm, SubmitHandler } from 'react-hook-form';
 
-import { getProjectDetail, updateSectionOrders } from '@/api/services';
+import {
+  getProjectDetail,
+  requestTodoistSyncApi,
+  requestTodoistSyncApiWithTempId,
+} from '@/api/services';
 import { PROJECT_KEYS } from '@/api/shared/queryKeys';
 import { IconButton, SvgIcon } from '@/components/icon';
 import { CircleLoading } from '@/components/loading';
-import { RequiredIdParam, Section, Task, TodoistSectionArg } from '@/entities';
-import { TodoistCommandTypeEnum } from '@/enums';
+import { CreateSectionInput, RequiredIdParam, Section, Task, TodoistSyncRequest } from '@/entities';
+import { ThemeLayout, TodoistCommandTypeEnum } from '@/enums';
+import { NAV_COLLAPSED_WIDTH, NAV_WIDTH } from '@/layouts/main/config';
 import { useRequiredParams } from '@/router/hooks';
-import { useProjectStore } from '@/stores';
+import { useProjectStore, useSettings } from '@/stores';
 import { useProjectStoreActions } from '@/stores/projectStore';
 
 import SectionColumn from './components/sectionColumn';
 import TaskCard from './components/taskCard';
 
 export default function KanbanBoard() {
+  const { themeLayout } = useSettings();
+  const [editMode, setEditMode] = useState(false);
   const { id } = useRequiredParams<RequiredIdParam>();
-  const { sections, project, tasks } = useProjectStore();
-  const { setSectionTasks, setSections, setProject, setTasks } = useProjectStoreActions();
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isValid },
+  } = useForm<CreateSectionInput>();
+  const { sections, projects } = useProjectStore();
+  const { setSections, setProject } = useProjectStoreActions();
+  /* Styling */
+  const kanbanBoardStyle: CSSProperties = {
+    maxWidth: `calc(100dvw - ${themeLayout === ThemeLayout.Vertical ? NAV_WIDTH : NAV_COLLAPSED_WIDTH}px)`,
+  };
 
   /* Query/Muation fn */
   const { isLoading } = useQuery({
@@ -40,34 +57,26 @@ export default function KanbanBoard() {
     queryFn: async () => {
       const projectDetail = await getProjectDetail(id);
       setProject(projectDetail.project);
-      setTasks(projectDetail.items);
-      setSections(projectDetail.sections);
-
-      projectDetail.sections.forEach((section: Section) => {
-        const sectionTasks = projectDetail.items.filter(
-          (task: Task) => task.section_id === section.id,
-        );
-        setSectionTasks(section.id, sectionTasks);
-      });
+      setSections(projectDetail.sections, projectDetail.items);
       return projectDetail;
     },
   });
 
+  const project = projects.get(id);
+  const projectSections = sections.get(id) || [];
+  const projectTasks = projectSections.map((s) => s.tasks).flat();
+
+  const addSection = useMutation({
+    mutationFn: (request: TodoistSyncRequest) =>
+      requestTodoistSyncApiWithTempId(request.type, request.args),
+  });
+
   const updateSectionOrder = useMutation({
-    mutationFn: (sectionsArgs: TodoistSectionArg[]) =>
-      updateSectionOrders([
-        {
-          type: TodoistCommandTypeEnum.SECTION_REORDER,
-          uuid: uuidv4().toString(),
-          args: {
-            sections: sectionsArgs,
-          },
-        },
-      ]),
+    mutationFn: (request: TodoistSyncRequest) => requestTodoistSyncApi(request.type, request.args),
   });
 
   /* Dnd setup */
-  const sectionIds = useMemo(() => sections.map((section) => section.id), [sections]);
+  const sectionIds = useMemo(() => projectSections.map((section) => section.id), [sections]);
   const [activeSection, setActiveSection] = useState<Section | null>(null);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const sensors = useSensors(
@@ -79,15 +88,53 @@ export default function KanbanBoard() {
   );
 
   /* Api Events */
-  const addNewSection = () => {
-    console.log('Adding a new column');
+  const addNewSectionMode = () => {
+    setEditMode(true);
+  };
+
+  const addANewSection = (sectionName: string) => {
+    addSection.mutate(
+      {
+        type: TodoistCommandTypeEnum.SECTION_ADD,
+        args: {
+          name: sectionName,
+          project_id: project?.id,
+        },
+      },
+      {
+        onSuccess: (data, variables) => {
+          const newSectionId = Object.values(data.temp_id_mapping)[0];
+          const newSection: Section = {
+            id: newSectionId,
+            project_id: project?.id as string,
+            // eslint-disable-next-line no-unsafe-optional-chaining
+            section_order: projectSections[projectSections.length - 1]?.section_order + 1 ?? 1,
+            name: variables.args.name as string,
+            tasks: [],
+          };
+          reset();
+        },
+        onError: (error) => {
+          console.error(error);
+        },
+      },
+    );
   };
 
   /* Events */
+  const onSubmit: SubmitHandler<CreateSectionInput> = (data) => addANewSection(data.sectionName);
+
+  const onCancel = () => {
+    setEditMode(false);
+    reset();
+  };
+
   const onDragStart = (event: DragStartEvent) => {
     // Start with blank state
     setActiveSection(null);
     setActiveTask(null);
+    setEditMode(false);
+    reset();
 
     if (event.active.data.current?.type === 'Section') {
       setActiveSection(event.active.data.current?.section);
@@ -104,28 +151,41 @@ export default function KanbanBoard() {
     if (!over) return;
 
     const isActiveASection = active.data.current?.type === 'Section';
+    const isOverASection = over.data.current?.type === 'Section';
     const activeSectionId = active.id;
     const overSectionId = over.id;
 
-    if (activeSectionId === overSectionId || !isActiveASection) return;
+    if (activeSectionId === overSectionId || !isActiveASection || !isOverASection) return;
 
-    const activeSectionIndex = sections.findIndex((section) => section.id === activeSectionId);
-    const overSecitonIndex = sections.findIndex((section) => section.id === overSectionId);
-    const updatedSections = arrayMove(sections, activeSectionIndex, overSecitonIndex);
+    const activeSectionIndex = projectSections.findIndex(
+      (section) => section.id === activeSectionId,
+    );
+    const overSecitonIndex = projectSections.findIndex((section) => section.id === overSectionId);
+    const updatedSections = arrayMove(projectSections, activeSectionIndex, overSecitonIndex);
     // Local state
-    setSections(updatedSections);
+    // setSections(updatedSections);
     // Server state
     updateSectionOrder.mutate(
-      [
-        { id: activeSectionId as string, section_order: over.data.current?.section?.section_order },
-        { id: overSectionId as string, section_order: active.data.current?.section?.section_order },
-      ],
+      {
+        type: TodoistCommandTypeEnum.SECTION_REORDER,
+        args: {
+          sections: [
+            {
+              id: activeSectionId as string,
+              section_order: over.data.current?.section?.section_order,
+            },
+            {
+              id: overSectionId as string,
+              section_order: active.data.current?.section?.section_order,
+            },
+          ],
+        },
+      },
       {
         onError: (error) => {
           console.error(error);
 
           const defaultSections = arrayMove(updatedSections, overSecitonIndex, activeSectionIndex);
-          setSections(defaultSections);
         },
       },
     );
@@ -146,33 +206,36 @@ export default function KanbanBoard() {
     if (!isActiveATask) return;
 
     if (isActiveATask && isOverATask) {
-      const activeTaskIndex = tasks.findIndex((t) => t.id === activeTaskId);
-      const overTaskIndex = tasks.findIndex((t) => t.id === overTaskId);
+      const activeTaskIndex = projectTasks.findIndex((t) => t.id === activeTaskId);
+      const overTaskIndex = projectTasks.findIndex((t) => t.id === overTaskId);
       // Update section_id if change section
-      tasks[activeTaskIndex].section_id = tasks[overTaskIndex].section_id;
-      const updatedTasks = arrayMove(tasks, activeTaskIndex, overTaskIndex);
+      projectTasks[activeTaskIndex].section_id = projectTasks[overTaskIndex].section_id;
+      const updatedTasks = arrayMove(projectTasks, activeTaskIndex, overTaskIndex);
 
-      setTasks(updatedTasks);
-      sections.forEach((section: Section) => {
+      const updatedSections = projectSections.map((section: Section) => {
         const sectionTasks = updatedTasks.filter((task: Task) => task.section_id === section.id);
-        setSectionTasks(section.id, sectionTasks);
+        section.tasks = sectionTasks;
+        return section;
       });
 
+      setSections(updatedSections, updatedTasks);
+      console.log(sections)
       return;
     }
 
     const isOverAColumn = over.data.current?.type === 'Section';
 
     if (isOverAColumn) {
-      const activeTaskIndex = tasks.findIndex((t) => t.id === activeTaskId);
-      tasks[activeTaskIndex].section_id = overTaskId as string;
-      const updatedTasks = arrayMove(tasks, activeTaskIndex, activeTaskIndex);
+      const activeTaskIndex = projectTasks.findIndex((t) => t.id === activeTaskId);
+      projectTasks[activeTaskIndex].section_id = overTaskId as string;
+      const updatedTasks = arrayMove(projectTasks, activeTaskIndex, activeTaskIndex);
 
-      setTasks(updatedTasks);
-      sections.forEach((section: Section) => {
+      const updatedSections = projectSections.map((section: Section) => {
         const sectionTasks = updatedTasks.filter((task: Task) => task.section_id === section.id);
-        setSectionTasks(section.id, sectionTasks);
+        section.tasks = sectionTasks;
+        return section;
       });
+      setSections(updatedSections, updatedTasks);
     }
   };
 
@@ -181,8 +244,15 @@ export default function KanbanBoard() {
   }
 
   return (
-    <div className="flex flex-col">
-      <Typography.Title level={3}>{project?.name}</Typography.Title>
+    <div className="flex max-h-min flex-col overflow-hidden" style={kanbanBoardStyle}>
+      <div className="flex flex-row justify-between">
+        <Typography.Title className="flex flex-grow" level={3}>
+          {project?.name}
+        </Typography.Title>
+        <IconButton className="flex">
+          <SvgIcon icon="ic-plus" size={20} />
+        </IconButton>
+      </div>
       <DndContext
         onDragStart={onDragStart}
         onDragEnd={onDragEnd}
@@ -190,19 +260,51 @@ export default function KanbanBoard() {
         sensors={sensors}
         collisionDetection={pointerWithin}
       >
-        <div className="m-4 flex flex-row justify-start gap-4">
-          <div className="flex gap-6">
+        <div className="m-4 flex flex-row justify-start gap-4 overflow-auto">
+          <div className="flex h-full gap-6">
             <SortableContext strategy={horizontalListSortingStrategy} items={sectionIds}>
-              {sections.map((section) => (
+              {projectSections.map((section) => (
                 <SectionColumn key={section.id} section={section} />
               ))}
             </SortableContext>
-            <IconButton
-              onClick={addNewSection}
-              className="mt-4 flex h-[40px] w-[350px] min-w-[350px] cursor-pointer items-center justify-center gap-2 rounded-lg p-4"
-            >
-              <SvgIcon icon="ic-plus" size={20} /> Add Section
-            </IconButton>
+            {!editMode && (
+              <IconButton
+                onClick={addNewSectionMode}
+                className="mt-4 flex h-[40px] w-[350px] min-w-[350px] cursor-pointer items-center justify-center gap-2 rounded-lg p-4"
+              >
+                <SvgIcon icon="ic-plus" size={20} /> Add Section
+              </IconButton>
+            )}
+            {editMode && (
+              <form
+                className="flex h-[150px] w-[350px] min-w-[350px] flex-col gap-2 rounded-lg p-4"
+                onSubmit={handleSubmit(onSubmit)}
+              >
+                <input
+                  // eslint-disable-next-line jsx-a11y/no-autofocus
+                  autoFocus
+                  className="flex h-[40px] w-full rounded-lg p-2 outline-none focus:border focus:border-blue"
+                  {...register('sectionName', {
+                    required: true,
+                  })}
+                />
+                {errors.sectionName && <span className="text-xs">This field is required</span>}
+
+                <div className="flex flex-row gap-4 p-2">
+                  <input
+                    className="cursor-pointer rounded-lg bg-blue px-4 py-2 hover:opacity-70 disabled:cursor-default disabled:opacity-50"
+                    type="submit"
+                    disabled={!isValid}
+                  />
+                  <input
+                    onClick={onCancel}
+                    className="cursor-pointer rounded-lg border border-blue px-4 py-2 hover:bg-gray-200"
+                    type="button"
+                    value="Cancel"
+                  />
+                </div>
+              </form>
+            )}
           </div>
         </div>
         {createPortal(

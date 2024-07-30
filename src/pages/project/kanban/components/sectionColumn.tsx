@@ -6,7 +6,6 @@ import { IconButton, SvgIcon } from '@/components/icon';
 import { Section, UpdateSectionDto } from '@/entities';
 import { ThemeMode } from '@/enums';
 import { useSettings } from '@/stores';
-import { useProjectStoreActions } from '@/stores/projectStore';
 import { useThemeToken } from '@/themes/hooks';
 
 import TaskCard from './taskCard';
@@ -17,9 +16,8 @@ type Props = {
 
 export default function SectionColumn({ section }: Props) {
   const [editMode, setEditMode] = useState(false);
-  const { colorBgContainer, colorBgContainerDisabled, colorPrimaryBgHover } = useThemeToken();
+  const { colorBgContainer, colorBgContainerDisabled } = useThemeToken();
   const { themeMode } = useSettings();
-  const { updateSectionDetail, removeSection, addNewTask } = useProjectStoreActions();
 
   const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
     id: section.id,
@@ -32,7 +30,7 @@ export default function SectionColumn({ section }: Props) {
 
   const taskIds = useMemo(() => {
     return section?.tasks.map((task) => task.id);
-  }, [section]);
+  }, [section, section.tasks]);
 
   const sectionStyle: CSSProperties = {
     transition,
@@ -52,11 +50,11 @@ export default function SectionColumn({ section }: Props) {
   };
 
   const updateSection = (sectionId: string, updateSectionDto: UpdateSectionDto) => {
-    updateSectionDetail(sectionId, updateSectionDto);
+    // updateSectionDetail(sectionId, updateSectionDto);
   };
 
   const deleteSection = (sectionId: string) => {
-    removeSection(sectionId);
+    // removeSection(sectionId);
   };
 
   const createTask = () => {
@@ -65,7 +63,7 @@ export default function SectionColumn({ section }: Props) {
       section_id: section.id,
       content: 'Testing',
     };
-    addNewTask(newTask);
+    // addNewTask(newTask);
   };
 
   if (isDragging) {
@@ -82,7 +80,7 @@ export default function SectionColumn({ section }: Props) {
     <div
       ref={setNodeRef}
       style={sectionStyle}
-      className="flex h-fit w-[350px] flex-col rounded-2xl p-4"
+      className="flex h-[78dvh] max-h-[78dvh] w-[350px] flex-col rounded-2xl p-4"
     >
       {/* Section title */}
       <div
@@ -93,22 +91,13 @@ export default function SectionColumn({ section }: Props) {
         {...listeners}
       >
         <div className="flex items-center gap-2">
-          <div
-            style={{
-              backgroundColor:
-                themeMode === ThemeMode.Light ? colorPrimaryBgHover : 'rgba(145, 158, 171, 0.12)',
-            }}
-            className="flex items-center justify-center rounded-full px-2 py-1 text-sm"
-          >
-            {section.section_order}
-          </div>
           {!editMode && section.name}
           {editMode && (
             <input
               // eslint-disable-next-line jsx-a11y/no-autofocus
               autoFocus
               style={titleInputStyle}
-              className="rounded outline-none focus:border focus:border-blue"
+              className="rounded p-2 text-base outline-none focus:border focus:border-blue"
               onChange={(e) => updateSection(section.id, { name: e.target.value })}
               onBlur={() => {
                 setEditMode(false);
@@ -127,7 +116,7 @@ export default function SectionColumn({ section }: Props) {
 
       {/* Section task container */}
       <div className="flex flex-grow flex-col gap-4 overflow-y-auto overflow-x-hidden p-2">
-        <SortableContext strategy={verticalListSortingStrategy} items={taskIds}>
+        <SortableContext items={taskIds}>
           {section.tasks?.length > 0 &&
             section.tasks.map((task) => <TaskCard key={task.id} task={task} />)}
         </SortableContext>

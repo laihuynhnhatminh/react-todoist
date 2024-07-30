@@ -1,62 +1,39 @@
-import { clone } from 'ramda';
 import { create } from 'zustand';
 
-import { Project, Section, Task, UpdateSectionDto } from '@/entities';
+import { Project, Section, Task } from '@/entities';
 
 type ProjectStore = {
-  project: Project | null;
-  sections: Section[];
-  tasks: Task[];
+  projects: Map<string, Project>;
+  sections: Map<string, Section[]>;
   actions: {
-    setProject: (projects: Project) => void;
-    setSections: (sections: Section[]) => void;
-    setTasks: (tasks: Task[]) => void;
-    setSectionTasks: (sectionId: string, tasks: Task[]) => void;
-    addNewSection: (section: Section) => void;
-    updateSectionDetail: (sectionId: string, data: UpdateSectionDto) => void;
-    removeSection: (sectionId: string) => void;
-    addNewTask: (task: Task) => void;
+    setProject: (project: Project) => void;
+    setSections: (sections: Section[], tasks: Task[]) => void;
   };
 };
 
 const useProjectStore = create<ProjectStore>((set) => ({
-  project: null,
-  sections: [],
-  tasks: [],
+  projects: new Map(),
+  sections: new Map(),
   actions: {
-    setProject: (project) => set(() => ({ project: clone(project) })),
-    setTasks: (tasks) => set(() => ({ tasks: clone(tasks) })),
-    setSections: (sections) => set(() => ({ sections: clone(sections) })),
-    setSectionTasks: (sectionId, tasks) =>
-      set((state) => ({
-        sections:
-          state.sections.map((section) =>
-            section.id === sectionId ? { ...section, tasks: tasks || [] } : section,
-          ) ?? state.sections,
-      })),
-    addNewSection: (section) =>
-      set((state) => ({
-        sections: [...state.sections, section],
-      })),
-    updateSectionDetail: (sectionId, data) =>
+    setProject: (project) =>
+      set((state) => ({ projects: state.projects.set(project.id, project) })),
+    setSections: (sections, tasks) =>
       set((state) => {
-        const newSections = state.sections.map((section) => {
-          if (section.id !== sectionId) return section;
-          return { ...section, name: data.name };
-        });
-        return { sections: newSections };
+        const newSections = sections.reduce((acc: Map<string, Section[]>, curr) => {
+          const currTasks = tasks.filter((task) => task.section_id === curr.id);
+          curr.tasks = currTasks;
+          const arr = acc.get(curr.project_id);
+          if (!arr) {
+            acc.set(curr.project_id, [curr]);
+          } else {
+            acc.set(curr.project_id, [...arr, curr]);
+          }
+
+          return acc;
+        }, new Map());
+
+        return { sections: new Map([...state.sections, ...newSections]) };
       }),
-    removeSection: (sectionId) =>
-      set((state) => ({ sections: state.sections.filter((section) => section.id !== sectionId) })),
-    addNewTask: (task) =>
-      set((state) => ({
-        sections:
-          state.sections.map((section) =>
-            section.id === task.section_id
-              ? { ...section, tasks: [...section.tasks, task] }
-              : section,
-          ) ?? state.sections,
-      })),
   },
 }));
 
