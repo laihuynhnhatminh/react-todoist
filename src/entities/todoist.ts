@@ -12,16 +12,22 @@ export type TodoistFullSyncedResources = {
   sections?: Section[];
 };
 
-export type TodoistSyncedError = { error_code: number; error: string };
+export type TodoistSyncedError = {
+  error_code: number;
+  error: string;
+  error_tag: string;
+  http_code: number;
+};
 
 export type TodoistSyncedResult = {
-  sync_status: { [uuid: string]: string | TodoistSyncedError };
+  sync_status: { [uuid: string]: TodoistSyncedError };
   temp_id_mapping: { [uuid: string]: string };
 };
 
 /* Request */
 export type TodoistSyncRequest = {
   type: TodoistCommandTypeEnum;
+  uuid?: string;
   args: TodoistArgsType;
 };
 

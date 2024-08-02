@@ -3,12 +3,14 @@ import { CSS } from '@dnd-kit/utilities';
 import { CSSProperties, useMemo, useState } from 'react';
 
 import { IconButton, SvgIcon } from '@/components/icon';
-import { Section, UpdateSectionDto } from '@/entities';
-import { ThemeMode } from '@/enums';
+import { Section, TodoistSyncRequest, UpdateSectionDto } from '@/entities';
+import { ThemeMode, TodoistCommandTypeEnum } from '@/enums';
 import { useSettings } from '@/stores';
 import { useThemeToken } from '@/themes/hooks';
 
 import TaskCard from './taskCard';
+import { useMutation } from '@tanstack/react-query';
+import { requestTodoistSyncApi } from '@/api/services';
 
 type Props = {
   readonly section: Section;
@@ -16,9 +18,9 @@ type Props = {
 
 export default function SectionColumn({ section }: Props) {
   const [editMode, setEditMode] = useState(false);
+  const [hideSection, setHideSection] = useState(false);
   const { colorBgContainer, colorBgContainerDisabled } = useThemeToken();
   const { themeMode } = useSettings();
-
   const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
     id: section.id,
     data: {
@@ -26,6 +28,10 @@ export default function SectionColumn({ section }: Props) {
       section,
     },
     disabled: editMode,
+  });
+
+  const handleSectionMutationRequest = useMutation({
+    mutationFn: (request: TodoistSyncRequest) => requestTodoistSyncApi(request.type, request.args),
   });
 
   const taskIds = useMemo(() => {
@@ -50,11 +56,49 @@ export default function SectionColumn({ section }: Props) {
   };
 
   const updateSection = (sectionId: string, updateSectionDto: UpdateSectionDto) => {
-    // updateSectionDetail(sectionId, updateSectionDto);
+    if (section.name === updateSectionDto.name) return;
+
+    handleSectionMutationRequest.mutate(
+      {
+        type: TodoistCommandTypeEnum.SECTION_UPDATE,
+        args: {
+          id: sectionId,
+          name: updateSectionDto.name,
+        },
+      },
+      {
+        onError: (error) => {
+          console.error(error);
+        },
+      },
+    );
   };
 
-  const deleteSection = (sectionId: string) => {
-    // removeSection(sectionId);
+  const deleteSection = () => {
+    setHideSection(true);
+    handleSectionMutationRequest.mutate(
+      {
+        type: TodoistCommandTypeEnum.SECTION_TEST,
+        args: {
+          id: section.id,
+        },
+      },
+      {
+        onSuccess(data, variables) {
+          console.log(data);
+          console.log(variables);
+          const syncStatus = Object.values(data.sync_status)[0];
+          if (syncStatus.error) {
+            console.error(syncStatus.http_code, syncStatus.error);
+
+            setHideSection(false);
+          }
+        },
+        onError: (error) => {
+          console.error(error);
+        },
+      },
+    );
   };
 
   const createTask = () => {
@@ -78,6 +122,7 @@ export default function SectionColumn({ section }: Props) {
 
   return (
     <div
+      hidden={hideSection}
       ref={setNodeRef}
       style={sectionStyle}
       className="flex h-[78dvh] max-h-[78dvh] w-[350px] flex-col rounded-2xl p-4"
@@ -97,9 +142,10 @@ export default function SectionColumn({ section }: Props) {
               // eslint-disable-next-line jsx-a11y/no-autofocus
               autoFocus
               style={titleInputStyle}
-              className="rounded p-2 text-base outline-none focus:border focus:border-blue"
-              onChange={(e) => updateSection(section.id, { name: e.target.value })}
-              onBlur={() => {
+              defaultValue={section.name}
+              className="rounded p-2 text-sm outline-none focus:border focus:border-blue"
+              onBlur={(e) => {
+                updateSection(section.id, { name: e.target.value });
                 setEditMode(false);
               }}
               onKeyDown={(e) => {
@@ -109,14 +155,20 @@ export default function SectionColumn({ section }: Props) {
             />
           )}
         </div>
-        <IconButton className="bg-transparent" onClick={() => deleteSection(section.id)}>
+        <IconButton
+          className="bg-transparent"
+          onClick={(e) => {
+            e.preventDefault();
+            deleteSection();
+          }}
+        >
           <SvgIcon icon="ic-trash" size={20} />
         </IconButton>
       </div>
 
       {/* Section task container */}
       <div className="flex flex-grow flex-col gap-4 overflow-y-auto overflow-x-hidden p-2">
-        <SortableContext items={taskIds}>
+        <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
           {section.tasks?.length > 0 &&
             section.tasks.map((task) => <TaskCard key={task.id} task={task} />)}
         </SortableContext>

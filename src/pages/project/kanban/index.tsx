@@ -45,7 +45,7 @@ export default function KanbanBoard() {
     formState: { errors, isValid },
   } = useForm<CreateSectionInput>();
   const { sections, projects } = useProjectStore();
-  const { setSections, setProject } = useProjectStoreActions();
+  const { setSections, setProject, setTasks } = useProjectStoreActions();
   /* Styling */
   const kanbanBoardStyle: CSSProperties = {
     maxWidth: `calc(100dvw - ${themeLayout === ThemeLayout.Vertical ? NAV_WIDTH : NAV_COLLAPSED_WIDTH}px)`,
@@ -58,12 +58,15 @@ export default function KanbanBoard() {
       const projectDetail = await getProjectDetail(id);
       setProject(projectDetail.project);
       setSections(projectDetail.sections, projectDetail.items);
+      setTasks(projectDetail.items);
       return projectDetail;
     },
   });
 
   const project = projects.get(id);
-  const projectSections = sections.get(id) || [];
+  const projectSections = useMemo(() => {
+    return sections.get(id) || [];
+  }, [sections, id]);
   const projectTasks = projectSections.map((s) => s.tasks).flat();
 
   const addSection = useMutation({
@@ -76,7 +79,7 @@ export default function KanbanBoard() {
   });
 
   /* Dnd setup */
-  const sectionIds = useMemo(() => projectSections.map((section) => section.id), [sections]);
+  const sectionIds = useMemo(() => projectSections.map((section) => section.id), [projectSections]);
   const [activeSection, setActiveSection] = useState<Section | null>(null);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const sensors = useSensors(
@@ -93,6 +96,8 @@ export default function KanbanBoard() {
   };
 
   const addANewSection = (sectionName: string) => {
+    setEditMode(false);
+    reset();
     addSection.mutate(
       {
         type: TodoistCommandTypeEnum.SECTION_ADD,
@@ -108,11 +113,11 @@ export default function KanbanBoard() {
             id: newSectionId,
             project_id: project?.id as string,
             // eslint-disable-next-line no-unsafe-optional-chaining
-            section_order: projectSections[projectSections.length - 1]?.section_order + 1 ?? 1,
+            section_order: projectSections[projectSections.length - 1]?.section_order + 1 || 1,
             name: variables.args.name as string,
             tasks: [],
           };
-          reset();
+          setSections([...projectSections, newSection], projectTasks);
         },
         onError: (error) => {
           console.error(error);
@@ -163,7 +168,7 @@ export default function KanbanBoard() {
     const overSecitonIndex = projectSections.findIndex((section) => section.id === overSectionId);
     const updatedSections = arrayMove(projectSections, activeSectionIndex, overSecitonIndex);
     // Local state
-    // setSections(updatedSections);
+    setSections(updatedSections, projectTasks);
     // Server state
     updateSectionOrder.mutate(
       {
@@ -186,6 +191,7 @@ export default function KanbanBoard() {
           console.error(error);
 
           const defaultSections = arrayMove(updatedSections, overSecitonIndex, activeSectionIndex);
+          setSections(defaultSections, projectTasks);
         },
       },
     );
@@ -219,7 +225,7 @@ export default function KanbanBoard() {
       });
 
       setSections(updatedSections, updatedTasks);
-      console.log(sections)
+      // API CALL TO UPDATE TASK ORDER
       return;
     }
 
@@ -236,6 +242,7 @@ export default function KanbanBoard() {
         return section;
       });
       setSections(updatedSections, updatedTasks);
+      // API CALL TO UPDATE TASK ORDER
     }
   };
 
