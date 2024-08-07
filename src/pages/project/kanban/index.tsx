@@ -16,11 +16,7 @@ import { CSSProperties, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useForm, SubmitHandler } from 'react-hook-form';
 
-import {
-  getProjectDetail,
-  requestTodoistSyncApi,
-  requestTodoistSyncApiWithTempId,
-} from '@/api/services';
+import { getProjectDetail, requestTodoistSyncApi } from '@/api/services';
 import { PROJECT_KEYS } from '@/api/shared/queryKeys';
 import { IconButton, SvgIcon } from '@/components/icon';
 import { CircleLoading } from '@/components/loading';
@@ -29,10 +25,10 @@ import { ThemeLayout, TodoistCommandTypeEnum } from '@/enums';
 import { NAV_COLLAPSED_WIDTH, NAV_WIDTH } from '@/layouts/main/config';
 import { useRequiredParams } from '@/router/hooks';
 import { useProjectStore, useSettings } from '@/stores';
-import { useProjectStoreActions } from '@/stores/projectStore';
 
 import SectionColumn from './components/sectionColumn';
 import TaskCard from './components/taskCard';
+import { useAddSection, useReorderSection } from '@/hooks';
 
 export default function KanbanBoard() {
   const { themeLayout } = useSettings();
@@ -44,42 +40,23 @@ export default function KanbanBoard() {
     reset,
     formState: { errors, isValid },
   } = useForm<CreateSectionInput>();
-  const { sections, projects } = useProjectStore();
-  const { setSections, setProject, setTasks } = useProjectStoreActions();
   /* Styling */
   const kanbanBoardStyle: CSSProperties = {
     maxWidth: `calc(100dvw - ${themeLayout === ThemeLayout.Vertical ? NAV_WIDTH : NAV_COLLAPSED_WIDTH}px)`,
   };
 
   /* Query/Muation fn */
-  const { isLoading } = useQuery({
+  const addSection = useAddSection();
+  const reorderSection = useReorderSection();
+  const { isLoading, data } = useQuery({
     queryKey: PROJECT_KEYS.project(id),
-    queryFn: async () => {
-      const projectDetail = await getProjectDetail(id);
-      setProject(projectDetail.project);
-      setSections(projectDetail.sections, projectDetail.items);
-      setTasks(projectDetail.items);
-      return projectDetail;
-    },
+    queryFn: () => getProjectDetail(id),
   });
 
-  const project = projects.get(id);
-  const projectSections = useMemo(() => {
-    return sections.get(id) || [];
-  }, [sections, id]);
-  const projectTasks = projectSections.map((s) => s.tasks).flat();
-
-  const addSection = useMutation({
-    mutationFn: (request: TodoistSyncRequest) =>
-      requestTodoistSyncApiWithTempId(request.type, request.args),
-  });
-
-  const updateSectionOrder = useMutation({
-    mutationFn: (request: TodoistSyncRequest) => requestTodoistSyncApi(request.type, request.args),
-  });
+  const sections = useMemo(() => data?.sections || [], [data]);
 
   /* Dnd setup */
-  const sectionIds = useMemo(() => projectSections.map((section) => section.id), [projectSections]);
+  const sectionIds = useMemo(() => sections.map((section) => section.id) || [], [sections]);
   const [activeSection, setActiveSection] = useState<Section | null>(null);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const sensors = useSensors(
@@ -98,32 +75,10 @@ export default function KanbanBoard() {
   const addANewSection = (sectionName: string) => {
     setEditMode(false);
     reset();
-    addSection.mutate(
-      {
-        type: TodoistCommandTypeEnum.SECTION_ADD,
-        args: {
-          name: sectionName,
-          project_id: project?.id,
-        },
-      },
-      {
-        onSuccess: (data, variables) => {
-          const newSectionId = Object.values(data.temp_id_mapping)[0];
-          const newSection: Section = {
-            id: newSectionId,
-            project_id: project?.id as string,
-            // eslint-disable-next-line no-unsafe-optional-chaining
-            section_order: projectSections[projectSections.length - 1]?.section_order + 1 || 1,
-            name: variables.args.name as string,
-            tasks: [],
-          };
-          setSections([...projectSections, newSection], projectTasks);
-        },
-        onError: (error) => {
-          console.error(error);
-        },
-      },
-    );
+    addSection.mutate({
+      name: sectionName,
+      project_id: id,
+    });
   };
 
   /* Events */
@@ -135,17 +90,15 @@ export default function KanbanBoard() {
   };
 
   const onDragStart = (event: DragStartEvent) => {
-    // Start with blank state
+    //   // Start with blank state
     setActiveSection(null);
-    setActiveTask(null);
+    //   setActiveTask(null);
     setEditMode(false);
     reset();
-
     if (event.active.data.current?.type === 'Section') {
       setActiveSection(event.active.data.current?.section);
       return;
     }
-
     if (event.active.data.current?.type === 'Task') {
       setActiveTask(event.active.data.current?.task);
     }
@@ -161,90 +114,72 @@ export default function KanbanBoard() {
     const overSectionId = over.id;
 
     if (activeSectionId === overSectionId || !isActiveASection || !isOverASection) return;
-
-    const activeSectionIndex = projectSections.findIndex(
-      (section) => section.id === activeSectionId,
-    );
-    const overSecitonIndex = projectSections.findIndex((section) => section.id === overSectionId);
-    const updatedSections = arrayMove(projectSections, activeSectionIndex, overSecitonIndex);
-    // Local state
-    setSections(updatedSections, projectTasks);
     // Server state
-    updateSectionOrder.mutate(
-      {
-        type: TodoistCommandTypeEnum.SECTION_REORDER,
-        args: {
-          sections: [
-            {
-              id: activeSectionId as string,
-              section_order: over.data.current?.section?.section_order,
-            },
-            {
-              id: overSectionId as string,
-              section_order: active.data.current?.section?.section_order,
-            },
-          ],
-        },
+    reorderSection.mutate({
+      project_id: id,
+      args: {
+        sections: [
+          {
+            id: activeSectionId as string,
+            section_order: over.data.current?.section?.section_order,
+          },
+          {
+            id: overSectionId as string,
+            section_order: active.data.current?.section?.section_order,
+          },
+        ],
       },
-      {
-        onError: (error) => {
-          console.error(error);
-
-          const defaultSections = arrayMove(updatedSections, overSecitonIndex, activeSectionIndex);
-          setSections(defaultSections, projectTasks);
-        },
-      },
-    );
+    });
   };
 
-  const onDragOver = (event: DragOverEvent) => {
-    const { active, over } = event;
-    if (!over) return;
+  // const onDragOver = (event: DragOverEvent) => {
+  //   const { active, over } = event;
+  //   if (!over) return;
 
-    const activeTaskId = active.id;
-    const overTaskId = over.id;
+  //   const activeTaskId = active.id;
+  //   const overTaskId = over.id;
 
-    if (activeTaskId === overTaskId) return;
+  //   if (activeTaskId === overTaskId) return;
 
-    const isActiveATask = active.data.current?.type === 'Task';
-    const isOverATask = over.data.current?.type === 'Task';
+  //   const isActiveATask = active.data.current?.type === 'Task';
+  //   const isOverATask = over.data.current?.type === 'Task';
 
-    if (!isActiveATask) return;
+  //   if (!isActiveATask) return;
 
-    if (isActiveATask && isOverATask) {
-      const activeTaskIndex = projectTasks.findIndex((t) => t.id === activeTaskId);
-      const overTaskIndex = projectTasks.findIndex((t) => t.id === overTaskId);
-      // Update section_id if change section
-      projectTasks[activeTaskIndex].section_id = projectTasks[overTaskIndex].section_id;
-      const updatedTasks = arrayMove(projectTasks, activeTaskIndex, overTaskIndex);
+  //   if (isActiveATask && isOverATask) {
+  //     const activeTaskIndex = projectTasks.findIndex((t) => t.id === activeTaskId);
+  //     const overTaskIndex = projectTasks.findIndex((t) => t.id === overTaskId);
+  //     // Update section_id if change section
+  //     projectTasks[activeTaskIndex].section_id = projectTasks[overTaskIndex].section_id;
+  //     const updatedTasks = arrayMove(projectTasks, activeTaskIndex, overTaskIndex);
 
-      const updatedSections = projectSections.map((section: Section) => {
-        const sectionTasks = updatedTasks.filter((task: Task) => task.section_id === section.id);
-        section.tasks = sectionTasks;
-        return section;
-      });
+  //     const updatedSections = projectSections.map((section: Section) => {
+  //       const sectionTasks = updatedTasks.filter((task: Task) => task.section_id === section.id);
+  //       section.tasks = sectionTasks;
+  //       return section;
+  //     });
 
-      setSections(updatedSections, updatedTasks);
-      // API CALL TO UPDATE TASK ORDER
-      return;
-    }
+  //     setSections(updatedSections, updatedTasks);
+  //     // API CALL TO UPDATE TASK ORDER
+  //     return;
+  //   }
 
-    const isOverAColumn = over.data.current?.type === 'Section';
+  //   const isOverAColumn = over.data.current?.type === 'Section';
 
-    if (isOverAColumn) {
-      const activeTaskIndex = projectTasks.findIndex((t) => t.id === activeTaskId);
-      projectTasks[activeTaskIndex].section_id = overTaskId as string;
-      const updatedTasks = arrayMove(projectTasks, activeTaskIndex, activeTaskIndex);
+  //   if (isOverAColumn) {
+  //     const activeTaskIndex = projectTasks.findIndex((t) => t.id === activeTaskId);
+  //     projectTasks[activeTaskIndex].section_id = overTaskId as string;
+  //     const updatedTasks = arrayMove(projectTasks, activeTaskIndex, activeTaskIndex);
 
-      const updatedSections = projectSections.map((section: Section) => {
-        const sectionTasks = updatedTasks.filter((task: Task) => task.section_id === section.id);
-        section.tasks = sectionTasks;
-        return section;
-      });
-      setSections(updatedSections, updatedTasks);
-      // API CALL TO UPDATE TASK ORDER
-    }
-  };
+  //     const updatedSections = projectSections.map((section: Section) => {
+  //       const sectionTasks = updatedTasks.filter((task: Task) => task.section_id === section.id);
+  //       section.tasks = sectionTasks;
+  //       return section;
+  //     });
+  //     setSections(updatedSections, updatedTasks);
+  //     // API CALL TO UPDATE TASK ORDER
+  //   }
+  // };
 
   if (isLoading) {
     return <CircleLoading />;
@@ -254,7 +189,7 @@ export default function KanbanBoard() {
     <div className="flex max-h-min flex-col overflow-hidden" style={kanbanBoardStyle}>
       <div className="flex flex-row justify-between">
         <Typography.Title className="flex flex-grow" level={3}>
-          {project?.name}
+          {data?.project.name}
         </Typography.Title>
         <IconButton className="flex">
           <SvgIcon icon="ic-plus" size={20} />
@@ -263,14 +198,14 @@ export default function KanbanBoard() {
       <DndContext
         onDragStart={onDragStart}
         onDragEnd={onDragEnd}
-        onDragOver={onDragOver}
+        // onDragOver={onDragOver}
         sensors={sensors}
         collisionDetection={pointerWithin}
       >
         <div className="m-4 flex flex-row justify-start gap-4 overflow-auto">
           <div className="flex h-full gap-6">
             <SortableContext strategy={horizontalListSortingStrategy} items={sectionIds}>
-              {projectSections.map((section) => (
+              {sections.map((section) => (
                 <SectionColumn key={section.id} section={section} />
               ))}
             </SortableContext>
@@ -317,7 +252,7 @@ export default function KanbanBoard() {
         {createPortal(
           <DragOverlay>
             {activeSection && <SectionColumn section={activeSection} />}
-            {activeTask && <TaskCard task={activeTask} />}
+            {/* {activeTask && <TaskCard task={activeTask} />} */}
           </DragOverlay>,
           document.body,
         )}

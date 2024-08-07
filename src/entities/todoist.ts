@@ -31,25 +31,21 @@ export type TodoistSyncRequest = {
   args: TodoistArgsType;
 };
 
-export type TodoistArgs = {
-  name?: string;
-  project_id?: string;
+export type TodoistAddSectionArgs = {
+  project_id: string;
+  name: string;
 };
 
-export type TodoistSectionArg = {
-  id?: string;
-  name?: string;
-  section_order?: number;
-  project_id?: string;
+export type TodoistReorderSectionArgs = {
+  sections: {
+    id: string;
+    section_order: number;
+  }[];
 };
 
-export type TodoistArgsType = TodoistSectionArg & {
-  sections?: TodoistSectionArg[];
+export type TodoistReorderSectionDto = {
+  project_id: string;
+  args: TodoistReorderSectionArgs;
 };
 
-export type TodoistCommand = {
-  type: TodoistCommandTypeEnum;
-  uuid: string;
-  temp_id?: string;
-  args: TodoistArgsType;
-};
+export type TodoistArgsType = TodoistAddSectionArgs | TodoistReorderSectionArgs;

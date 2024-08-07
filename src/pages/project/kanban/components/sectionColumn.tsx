@@ -8,7 +8,6 @@ import { ThemeMode, TodoistCommandTypeEnum } from '@/enums';
 import { useSettings } from '@/stores';
 import { useThemeToken } from '@/themes/hooks';
 
-import TaskCard from './taskCard';
 import { useMutation } from '@tanstack/react-query';
 import { requestTodoistSyncApi } from '@/api/services';
 
@@ -18,7 +17,6 @@ type Props = {
 
 export default function SectionColumn({ section }: Props) {
   const [editMode, setEditMode] = useState(false);
-  const [hideSection, setHideSection] = useState(false);
   const { colorBgContainer, colorBgContainerDisabled } = useThemeToken();
   const { themeMode } = useSettings();
   const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
@@ -33,10 +31,6 @@ export default function SectionColumn({ section }: Props) {
   const handleSectionMutationRequest = useMutation({
     mutationFn: (request: TodoistSyncRequest) => requestTodoistSyncApi(request.type, request.args),
   });
-
-  const taskIds = useMemo(() => {
-    return section?.tasks.map((task) => task.id);
-  }, [section, section.tasks]);
 
   const sectionStyle: CSSProperties = {
     transition,
@@ -58,56 +52,15 @@ export default function SectionColumn({ section }: Props) {
   const updateSection = (sectionId: string, updateSectionDto: UpdateSectionDto) => {
     if (section.name === updateSectionDto.name) return;
 
-    handleSectionMutationRequest.mutate(
-      {
-        type: TodoistCommandTypeEnum.SECTION_UPDATE,
-        args: {
-          id: sectionId,
-          name: updateSectionDto.name,
-        },
-      },
-      {
-        onError: (error) => {
-          console.error(error);
-        },
-      },
-    );
+    console.log('Update Section');
   };
 
   const deleteSection = () => {
-    setHideSection(true);
-    handleSectionMutationRequest.mutate(
-      {
-        type: TodoistCommandTypeEnum.SECTION_TEST,
-        args: {
-          id: section.id,
-        },
-      },
-      {
-        onSuccess(data, variables) {
-          console.log(data);
-          console.log(variables);
-          const syncStatus = Object.values(data.sync_status)[0];
-          if (syncStatus.error) {
-            console.error(syncStatus.http_code, syncStatus.error);
-
-            setHideSection(false);
-          }
-        },
-        onError: (error) => {
-          console.error(error);
-        },
-      },
-    );
+    console.log('Delete Section');
   };
 
   const createTask = () => {
-    const newTask: any = {
-      project_id: section.project_id,
-      section_id: section.id,
-      content: 'Testing',
-    };
-    // addNewTask(newTask);
+    console.log('Created Task');
   };
 
   if (isDragging) {
@@ -122,7 +75,6 @@ export default function SectionColumn({ section }: Props) {
 
   return (
     <div
-      hidden={hideSection}
       ref={setNodeRef}
       style={sectionStyle}
       className="flex h-[78dvh] max-h-[78dvh] w-[350px] flex-col rounded-2xl p-4"
@@ -168,10 +120,10 @@ export default function SectionColumn({ section }: Props) {
 
       {/* Section task container */}
       <div className="flex flex-grow flex-col gap-4 overflow-y-auto overflow-x-hidden p-2">
-        <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
+        {/* <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
           {section.tasks?.length > 0 &&
             section.tasks.map((task) => <TaskCard key={task.id} task={task} />)}
-        </SortableContext>
+        </SortableContext> */}
       </div>
       {/* Section footer */}
       <IconButton

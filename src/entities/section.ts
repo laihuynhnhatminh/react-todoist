@@ -7,12 +7,3 @@ export type Section = {
   name: string;
   tasks: Task[];
 };
-
-export type CreateSectionDto = {
-  projectId: string;
-  name: string;
-};
-
-export type UpdateSectionDto = {
-  name: string;
-};
