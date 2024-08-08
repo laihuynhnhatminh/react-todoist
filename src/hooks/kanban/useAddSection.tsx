@@ -24,7 +24,6 @@ export function useAddSection() {
         PROJECT_KEYS.project(addSectionArgs.project_id),
       );
       const tempSectionId = uuidv4();
-
       queryClient.setQueryData<ProjectDetails>(
         PROJECT_KEYS.project(addSectionArgs.project_id),
         (prev: ProjectDetails | undefined) => {
@@ -36,7 +35,10 @@ export function useAddSection() {
               id: tempSectionId,
               project_id: addSectionArgs.project_id,
               name: addSectionArgs.name,
-              section_order: prev.sections[prev.sections.length - 1].section_order + 1,
+              section_order:
+                prev.sections.length > 0
+                  ? prev.sections[prev.sections.length - 1].section_order + 1
+                  : 1,
               tasks: [],
             },
           ];

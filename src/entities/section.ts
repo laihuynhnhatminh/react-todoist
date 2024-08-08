@@ -1,3 +1,4 @@
+import { ProjectDetails } from './project';
 import { Task } from './task';
 import { TodoistReorderSectionArgs } from './todoist';
 
@@ -11,5 +12,6 @@ export type Section = {
 
 export type ReorderSectionDto = {
   project_id: string;
+  prevProjectDetails: ProjectDetails | undefined;
   args: TodoistReorderSectionArgs;
 };

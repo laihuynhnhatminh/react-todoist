@@ -20,36 +20,13 @@ export function useReorderSection() {
         exact: true,
       });
 
-      const previousSections = queryClient.getQueryData<ProjectDetails>(
-        PROJECT_KEYS.project(sectionReorderDto.project_id),
-      );
-
-      queryClient.setQueryData<ProjectDetails>(
-        PROJECT_KEYS.project(sectionReorderDto.project_id),
-        (prev: ProjectDetails | undefined) => {
-          if (!prev) return undefined;
-
-          const activeSectionIndex = prev.sections.findIndex(
-            (section) => section.id === sectionReorderDto.args.sections[0].id,
-          );
-          const overSectionIndex = prev.sections.findIndex(
-            (section) => section.id === sectionReorderDto.args.sections[1].id,
-          );
-          const newSections = arrayMove(prev.sections, activeSectionIndex, overSectionIndex);
-
-          return { ...prev, sections: newSections };
-        },
-      );
-
-      console.log('iscalled');
-
-      return { projectId: sectionReorderDto.project_id, previousSections };
+      return { projectId: sectionReorderDto.project_id, prevProjectDetails: sectionReorderDto.prevProjectDetails };
     },
     onError: (error, _variables, context) => {
       console.error(error);
 
       if (context) {
-        queryClient.setQueryData(PROJECT_KEYS.project(context.projectId), context.previousSections);
+        queryClient.setQueryData(PROJECT_KEYS.project(context.projectId), context.prevProjectDetails);
       }
     },
     onSuccess: () => {},

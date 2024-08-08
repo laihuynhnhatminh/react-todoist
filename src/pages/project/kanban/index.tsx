@@ -9,8 +9,8 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import { horizontalListSortingStrategy, SortableContext } from '@dnd-kit/sortable';
-import { useQuery } from '@tanstack/react-query';
+import { arrayMove, horizontalListSortingStrategy, SortableContext } from '@dnd-kit/sortable';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Typography } from 'antd';
 import { CSSProperties, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -20,7 +20,7 @@ import { getProjectDetail } from '@/api/services';
 import { PROJECT_KEYS } from '@/api/shared/queryKeys';
 import { IconButton, SvgIcon } from '@/components/icon';
 import { CircleLoading } from '@/components/loading';
-import { CreateSectionInput, RequiredIdParam, Section, Task } from '@/entities';
+import { CreateSectionInput, ProjectDetails, RequiredIdParam, Section, Task } from '@/entities';
 import { ThemeLayout } from '@/enums';
 import { NAV_COLLAPSED_WIDTH, NAV_WIDTH } from '@/layouts/main/config';
 import { useRequiredParams } from '@/router/hooks';
@@ -46,6 +46,7 @@ export default function KanbanBoard() {
   };
 
   /* Query/Muation fn */
+  const queryClient = useQueryClient();
   const addSection = useAddSection();
   const reorderSection = useReorderSection();
   const { isLoading, data } = useQuery({
@@ -57,7 +58,6 @@ export default function KanbanBoard() {
 
   /* Dnd setup */
   const sectionIds = useMemo(() => sections.map((section) => section.id) || [], [sections]);
-  console.log(sectionIds);
   const [activeSection, setActiveSection] = useState<Section | null>(null);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const sensors = useSensors(
@@ -116,19 +116,29 @@ export default function KanbanBoard() {
 
     if (activeSectionId === overSectionId || !isActiveASection || !isOverASection) return;
 
+    const activeSectionIndex = sections.findIndex((section) => section.id === activeSectionId);
+    const overSectionIndex = sections.findIndex((section) => section.id === overSectionId);
+    const newSections = arrayMove(sections, activeSectionIndex, overSectionIndex);
+
+    const prevProjectDetails = queryClient.getQueryData<ProjectDetails>(PROJECT_KEYS.project(id));
+
+    queryClient.setQueryData<ProjectDetails>(
+      PROJECT_KEYS.project(id),
+      (prev: ProjectDetails | undefined) => {
+        if (!prev) return undefined;
+
+        return { ...prev, sections: newSections };
+      },
+    );
+
     reorderSection.mutate({
       project_id: id,
+      prevProjectDetails,
       args: {
-        sections: [
-          {
-            id: activeSectionId as string,
-            section_order: over.data.current?.section?.section_order,
-          },
-          {
-            id: overSectionId as string,
-            section_order: active.data.current?.section?.section_order,
-          },
-        ],
+        sections: newSections.map((section, index) => ({
+          id: section.id,
+          section_order: index + 1,
+        })),
       },
     });
   };
