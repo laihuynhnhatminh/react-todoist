@@ -3,13 +3,10 @@ import { CSS } from '@dnd-kit/utilities';
 import { CSSProperties, useMemo, useState } from 'react';
 
 import { IconButton, SvgIcon } from '@/components/icon';
-import { Section, TodoistSyncRequest, UpdateSectionDto } from '@/entities';
-import { ThemeMode, TodoistCommandTypeEnum } from '@/enums';
+import { Section } from '@/entities';
+import { ThemeMode } from '@/enums';
 import { useSettings } from '@/stores';
 import { useThemeToken } from '@/themes/hooks';
-
-import { useMutation } from '@tanstack/react-query';
-import { requestTodoistSyncApi } from '@/api/services';
 
 type Props = {
   readonly section: Section;
@@ -26,10 +23,6 @@ export default function SectionColumn({ section }: Props) {
       section,
     },
     disabled: editMode,
-  });
-
-  const handleSectionMutationRequest = useMutation({
-    mutationFn: (request: TodoistSyncRequest) => requestTodoistSyncApi(request.type, request.args),
   });
 
   const sectionStyle: CSSProperties = {
@@ -49,9 +42,7 @@ export default function SectionColumn({ section }: Props) {
       themeMode === ThemeMode.Light ? colorBgContainerDisabled : 'rgba(145, 158, 171, 0.12)',
   };
 
-  const updateSection = (sectionId: string, updateSectionDto: UpdateSectionDto) => {
-    if (section.name === updateSectionDto.name) return;
-
+  const updateSection = (sectionId: string) => {
     console.log('Update Section');
   };
 
@@ -97,7 +88,6 @@ export default function SectionColumn({ section }: Props) {
               defaultValue={section.name}
               className="rounded p-2 text-sm outline-none focus:border focus:border-blue"
               onBlur={(e) => {
-                updateSection(section.id, { name: e.target.value });
                 setEditMode(false);
               }}
               onKeyDown={(e) => {

@@ -1,4 +1,5 @@
 import { Task } from './task';
+import { TodoistReorderSectionArgs } from './todoist';
 
 export type Section = {
   id: string;
@@ -6,4 +7,9 @@ export type Section = {
   section_order: number;
   name: string;
   tasks: Task[];
+};
+
+export type ReorderSectionDto = {
+  project_id: string;
+  args: TodoistReorderSectionArgs;
 };

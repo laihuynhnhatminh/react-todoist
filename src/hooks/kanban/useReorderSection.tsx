@@ -1,11 +1,12 @@
+import { arrayMove } from '@dnd-kit/sortable';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { requestTodoistSyncApi } from '@/api/services';
 import { PROJECT_KEYS } from '@/api/shared/queryKeys';
-import { TodoistReorderSectionDto } from '@/entities';
+import { ProjectDetails, ReorderSectionDto } from '@/entities';
 import { TodoistCommandTypeEnum } from '@/enums';
 
-const reorderSection = (sectionReorderDto: TodoistReorderSectionDto) =>
+const reorderSection = (sectionReorderDto: ReorderSectionDto) =>
   requestTodoistSyncApi(TodoistCommandTypeEnum.SECTION_REORDER, sectionReorderDto.args);
 
 export function useReorderSection() {
@@ -13,22 +14,49 @@ export function useReorderSection() {
 
   return useMutation({
     mutationFn: reorderSection,
-    onMutate: async (sectionReorderDto: TodoistReorderSectionDto) => {
+    onMutate: async (sectionReorderDto: ReorderSectionDto) => {
       await queryClient.cancelQueries({
         queryKey: PROJECT_KEYS.project(sectionReorderDto.project_id),
         exact: true,
       });
 
-      // Change order locally here
+      const previousSections = queryClient.getQueryData<ProjectDetails>(
+        PROJECT_KEYS.project(sectionReorderDto.project_id),
+      );
+
+      queryClient.setQueryData<ProjectDetails>(
+        PROJECT_KEYS.project(sectionReorderDto.project_id),
+        (prev: ProjectDetails | undefined) => {
+          if (!prev) return undefined;
+
+          const activeSectionIndex = prev.sections.findIndex(
+            (section) => section.id === sectionReorderDto.args.sections[0].id,
+          );
+          const overSectionIndex = prev.sections.findIndex(
+            (section) => section.id === sectionReorderDto.args.sections[1].id,
+          );
+          const newSections = arrayMove(prev.sections, activeSectionIndex, overSectionIndex);
+
+          return { ...prev, sections: newSections };
+        },
+      );
+
+      console.log('iscalled');
+
+      return { projectId: sectionReorderDto.project_id, previousSections };
     },
-    onError: () => {
-      // handle error
+    onError: (error, _variables, context) => {
+      console.error(error);
+
+      if (context) {
+        queryClient.setQueryData(PROJECT_KEYS.project(context.projectId), context.previousSections);
+      }
     },
-    onSuccess: () => {
-      // handle error if ok but is errored
-    },
-    onSettled: () => {
-      // refetch data
+    onSuccess: () => {},
+    onSettled: (_data, _error, _variables, context) => {
+      if (context) {
+        queryClient.invalidateQueries({ queryKey: PROJECT_KEYS.project(context.projectId) });
+      }
     },
   });
 }

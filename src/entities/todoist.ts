@@ -43,9 +43,4 @@ export type TodoistReorderSectionArgs = {
   }[];
 };
 
-export type TodoistReorderSectionDto = {
-  project_id: string;
-  args: TodoistReorderSectionArgs;
-};
-
 export type TodoistArgsType = TodoistAddSectionArgs | TodoistReorderSectionArgs;

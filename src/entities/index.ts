@@ -3,7 +3,7 @@ export type { Project, ProjectDetails, CreateProjectRequest } from './project';
 export type { Settings } from './settings';
 export type { UserInfo, UserToken } from './user';
 export type { AppRouteObject, RouteMeta } from './route';
-export type { Section } from './section';
+export type { Section, ReorderSectionDto } from './section';
 export type { RequiredIdParam } from './utils';
 export type { CreateSectionInput } from './input';
 export type {
@@ -14,5 +14,4 @@ export type {
   TodoistSyncRequest,
   TodoistAddSectionArgs,
   TodoistReorderSectionArgs,
-  TodoistReorderSectionDto,
 } from './todoist';

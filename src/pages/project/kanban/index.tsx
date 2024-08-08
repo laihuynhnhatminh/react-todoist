@@ -9,22 +9,22 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import { arrayMove, horizontalListSortingStrategy, SortableContext } from '@dnd-kit/sortable';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { horizontalListSortingStrategy, SortableContext } from '@dnd-kit/sortable';
+import { useQuery } from '@tanstack/react-query';
 import { Typography } from 'antd';
 import { CSSProperties, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useForm, SubmitHandler } from 'react-hook-form';
 
-import { getProjectDetail, requestTodoistSyncApi } from '@/api/services';
+import { getProjectDetail } from '@/api/services';
 import { PROJECT_KEYS } from '@/api/shared/queryKeys';
 import { IconButton, SvgIcon } from '@/components/icon';
 import { CircleLoading } from '@/components/loading';
-import { CreateSectionInput, RequiredIdParam, Section, Task, TodoistSyncRequest } from '@/entities';
-import { ThemeLayout, TodoistCommandTypeEnum } from '@/enums';
+import { CreateSectionInput, RequiredIdParam, Section, Task } from '@/entities';
+import { ThemeLayout } from '@/enums';
 import { NAV_COLLAPSED_WIDTH, NAV_WIDTH } from '@/layouts/main/config';
 import { useRequiredParams } from '@/router/hooks';
-import { useProjectStore, useSettings } from '@/stores';
+import { useSettings } from '@/stores';
 
 import SectionColumn from './components/sectionColumn';
 import TaskCard from './components/taskCard';
@@ -57,6 +57,7 @@ export default function KanbanBoard() {
 
   /* Dnd setup */
   const sectionIds = useMemo(() => sections.map((section) => section.id) || [], [sections]);
+  console.log(sectionIds);
   const [activeSection, setActiveSection] = useState<Section | null>(null);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const sensors = useSensors(
@@ -90,9 +91,9 @@ export default function KanbanBoard() {
   };
 
   const onDragStart = (event: DragStartEvent) => {
-    //   // Start with blank state
+    // Start with blank state
     setActiveSection(null);
-    //   setActiveTask(null);
+    setActiveTask(null);
     setEditMode(false);
     reset();
     if (event.active.data.current?.type === 'Section') {
@@ -114,7 +115,7 @@ export default function KanbanBoard() {
     const overSectionId = over.id;
 
     if (activeSectionId === overSectionId || !isActiveASection || !isOverASection) return;
-    // Server state
+
     reorderSection.mutate({
       project_id: id,
       args: {
